@@ -14,7 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TicketService } from '../../../core/services/ticket.service';
 import { UserService } from '../../../core/services/user.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Ticket, TicketStatus } from '../../../core/models/ticket.model';
+import { Ticket, TicketStatus, TicketPriority, TicketCategory } from '../../../core/models/ticket.model';
 import { User } from '../../../core/models/user.model';
 import { TicketStatusBadgeComponent } from '../../../shared/components/ticket-status-badge/ticket-status-badge.component';
 import { TicketNotesComponent } from './ticket-notes/ticket-notes.component';
@@ -58,11 +58,14 @@ export class TicketDetailComponent implements OnInit {
 
   showStatusPanel = false;
   showAssignPanel = false;
+  showEditPanel = false;
 
   readonly statuses: TicketStatus[] = ['NEW', 'IN_PROGRESS', 'WAITING_FOR_CUSTOMER', 'RESOLVED', 'CLOSED'];
+  readonly priorities: TicketPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+  readonly categories: TicketCategory[] = ['DELIVERY', 'PICKUP', 'DOCUMENTATION', 'CUSTOMER', 'SYSTEM', 'OTHER'];
 
   statusForm = this.fb.group({
-    newStatus: ['', Validators.required],
+    status: ['', Validators.required],
     reason: ['']
   });
 
@@ -70,10 +73,28 @@ export class TicketDetailComponent implements OnInit {
     operatorId: [null as number | null, Validators.required]
   });
 
+  editForm = this.fb.group({
+    title: ['', [Validators.required, Validators.maxLength(150)]],
+    description: ['', [Validators.required, Validators.maxLength(5000)]],
+    priority: ['', Validators.required],
+    category: ['', Validators.required],
+    externalRef: ['']
+  });
+
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.ticketService.get(id).subscribe({
-      next: (t) => { this.ticket = t; this.loading = false; },
+      next: (t) => {
+        this.ticket = t;
+        this.loading = false;
+        this.editForm.patchValue({
+          title: t.title,
+          description: t.description,
+          priority: t.priority,
+          category: t.category,
+          externalRef: t.externalRef ?? ''
+        });
+      },
       error: () => { this.error = 'Ticket not found.'; this.loading = false; }
     });
     this.userService.list().subscribe({
@@ -83,13 +104,29 @@ export class TicketDetailComponent implements OnInit {
 
   changeStatus(): void {
     if (!this.ticket || this.statusForm.invalid) return;
-    const { newStatus, reason } = this.statusForm.value;
+    const { status, reason } = this.statusForm.value;
     this.ticketService.changeStatus(this.ticket.id, {
-      newStatus: newStatus as TicketStatus,
+      status: status as TicketStatus,
       reason: reason || undefined
     }).subscribe({
       next: (t) => { this.ticket = t; this.showStatusPanel = false; this.statusForm.reset(); },
       error: () => { this.error = 'Failed to change status.'; }
+    });
+  }
+
+  saveEdit(): void {
+    if (!this.ticket || this.editForm.invalid) return;
+    const { title, description, priority, category, externalRef } = this.editForm.value;
+    this.ticketService.update(this.ticket.id, {
+      title: title!,
+      description: description!,
+      priority: priority as TicketPriority,
+      category: category as TicketCategory,
+      externalRef: externalRef || undefined,
+      version: this.ticket.version
+    }).subscribe({
+      next: (t) => { this.ticket = t; this.showEditPanel = false; },
+      error: () => { this.error = 'Failed to update ticket.'; }
     });
   }
 

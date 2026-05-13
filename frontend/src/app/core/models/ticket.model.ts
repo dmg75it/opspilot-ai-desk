@@ -1,5 +1,3 @@
-import { User } from './user.model';
-
 export type TicketStatus = 'NEW' | 'IN_PROGRESS' | 'WAITING_FOR_CUSTOMER' | 'RESOLVED' | 'CLOSED';
 export type TicketPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type TicketCategory = 'DELIVERY' | 'PICKUP' | 'DOCUMENTATION' | 'CUSTOMER' | 'SYSTEM' | 'OTHER';
@@ -12,8 +10,10 @@ export interface Ticket {
   status: TicketStatus;
   priority: TicketPriority;
   category: TicketCategory;
-  assignedTo?: User;
-  createdBy: User;
+  assignedToId?: number;
+  assignedToName?: string;
+  createdById: number;
+  createdByName: string;
   createdAt: string;
   updatedAt: string;
   resolvedAt?: string;
@@ -23,7 +23,8 @@ export interface Ticket {
 export interface TicketNote {
   id: number;
   ticketId: number;
-  author: User;
+  authorId: number;
+  authorName: string;
   body: string;
   visibility: 'INTERNAL' | 'AI_SUMMARY' | 'SYSTEM';
   createdAt: string;
@@ -47,7 +48,7 @@ export interface UpdateTicketRequest {
 }
 
 export interface ChangeStatusRequest {
-  newStatus: TicketStatus;
+  status: TicketStatus;
   reason?: string;
 }
 

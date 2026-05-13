@@ -7,7 +7,7 @@
     @for (note of notes; track note.id) {
       <div class="note-item" [class]="visibilityClass(note.visibility)">
         <div class="note-header">
-          <span class="note-author">{{ note.author.fullName }}</span>
+          <span class="note-author">{{ note.authorName }}</span>
           <span class="note-badge">{{ note.visibility }}</span>
           <span class="note-date">{{ note.createdAt | date:'short' }}</span>
         </div>
