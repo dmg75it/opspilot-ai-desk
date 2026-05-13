@@ -3,4 +3,8 @@ import { appConfig } from './app/app.config';
 import { App } from './app/app';
 
 bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+  .catch((err) => {
+    console.error(err);
+    document.body.style.background = '#fff';
+    document.body.innerHTML = `<pre style="color:red;padding:20px;font-size:14px">Bootstrap error:\n${err?.message ?? err}</pre>`;
+  });
