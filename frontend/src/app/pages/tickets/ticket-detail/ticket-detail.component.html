@@ -1,0 +1,134 @@
+<div class="ticket-detail">
+  @if (loading) {
+    <div class="center"><mat-spinner></mat-spinner></div>
+  }
+  @if (error) {
+    <div class="error-banner">{{ error }}</div>
+  }
+
+  @if (ticket) {
+    <div class="back-row">
+      <button mat-button (click)="backToList()">← Back to Tickets</button>
+    </div>
+
+    <mat-card class="detail-card">
+      <mat-card-header>
+        <mat-card-title>
+          <span class="ticket-id">#{{ ticket.id }}</span> {{ ticket.title }}
+        </mat-card-title>
+        <mat-card-subtitle>
+          <app-ticket-status-badge [status]="ticket.status"></app-ticket-status-badge>
+          <span class="priority-chip" [class]="'priority-' + ticket.priority.toLowerCase()">{{ ticket.priority }}</span>
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Category</span>
+            <span>{{ ticket.category }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">External Ref</span>
+            <span>{{ ticket.externalRef ?? '-' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Created By</span>
+            <span>{{ ticket.createdBy.fullName }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Assigned To</span>
+            <span>{{ ticket.assignedTo?.fullName ?? 'Unassigned' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Created At</span>
+            <span>{{ ticket.createdAt | date:'medium' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Updated At</span>
+            <span>{{ ticket.updatedAt | date:'medium' }}</span>
+          </div>
+          @if (ticket.resolvedAt) {
+            <div class="info-item">
+              <span class="label">Resolved At</span>
+              <span>{{ ticket.resolvedAt | date:'medium' }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="description-section">
+          <span class="label">Description</span>
+          <p>{{ ticket.description }}</p>
+        </div>
+
+        @if (!isClosed()) {
+          <div class="actions">
+            <button mat-stroked-button (click)="showStatusPanel = !showStatusPanel">Change Status</button>
+            <button mat-stroked-button (click)="showAssignPanel = !showAssignPanel">Assign</button>
+            @if (authService.isAdmin()) {
+              <button mat-stroked-button color="warn" (click)="closeTicket()">Close Ticket</button>
+            }
+          </div>
+        }
+
+        @if (showStatusPanel) {
+          <div class="action-panel">
+            <h3>Change Status</h3>
+            <form [formGroup]="statusForm" (ngSubmit)="changeStatus()" class="action-form">
+              <mat-form-field appearance="outline">
+                <mat-label>New Status</mat-label>
+                <mat-select formControlName="newStatus">
+                  @for (s of statuses; track s) {
+                    <mat-option [value]="s">{{ s }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Reason (optional)</mat-label>
+                <input matInput formControlName="reason" />
+              </mat-form-field>
+              <div class="panel-actions">
+                <button mat-button type="button" (click)="showStatusPanel = false">Cancel</button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="statusForm.invalid">Apply</button>
+              </div>
+            </form>
+          </div>
+        }
+
+        @if (showAssignPanel) {
+          <div class="action-panel">
+            <h3>Assign Ticket</h3>
+            <form [formGroup]="assignForm" (ngSubmit)="assignTicket()" class="action-form">
+              <mat-form-field appearance="outline">
+                <mat-label>Operator</mat-label>
+                <mat-select formControlName="operatorId">
+                  @for (op of operators; track op.id) {
+                    <mat-option [value]="op.id">{{ op.fullName }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <div class="panel-actions">
+                <button mat-button type="button" (click)="showAssignPanel = false">Cancel</button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="assignForm.invalid">Assign</button>
+              </div>
+            </form>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="tabs-card">
+      <mat-tab-group>
+        <mat-tab label="Notes">
+          <div class="tab-content">
+            <app-ticket-notes [ticketId]="ticket.id"></app-ticket-notes>
+          </div>
+        </mat-tab>
+        <mat-tab label="AI Chat">
+          <div class="tab-content">
+            <app-ai-chat [ticketId]="ticket.id"></app-ai-chat>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  }
+</div>

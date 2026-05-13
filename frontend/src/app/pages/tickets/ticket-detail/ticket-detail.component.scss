@@ -1,0 +1,98 @@
+.ticket-detail {
+  max-width: 960px;
+}
+
+.center { display: flex; justify-content: center; padding: 40px; }
+
+.error-banner {
+  background: #ffebee; color: #c62828;
+  border-radius: 4px; padding: 8px 12px; margin-bottom: 12px;
+}
+
+.back-row { margin-bottom: 8px; }
+
+.detail-card, .tabs-card { margin-bottom: 16px; }
+
+.ticket-id { color: #888; font-size: 16px; }
+
+.priority-chip {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  &.priority-low { background: #e8f5e9; color: #2e7d32; }
+  &.priority-medium { background: #fffde7; color: #f57f17; }
+  &.priority-high { background: #fff3e0; color: #e65100; }
+  &.priority-critical { background: #ffebee; color: #b71c1c; }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.info-item {
+  .label { display: block; font-size: 11px; color: #888; text-transform: uppercase; font-weight: 600; margin-bottom: 2px; }
+}
+
+.description-section {
+  margin-bottom: 16px;
+  .label { display: block; font-size: 11px; color: #888; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+  p { margin: 0; white-space: pre-wrap; color: #333; }
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.action-panel {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 16px;
+  margin-top: 12px;
+  h3 { margin-top: 0; }
+}
+
+.action-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  mat-form-field { min-width: 200px; }
+}
+
+.panel-actions { display: flex; gap: 8px; align-self: center; }
+
+.tab-content { padding: 16px 0; }
+
+.note-item {
+  border-left: 3px solid #e0e0e0;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border-radius: 0 4px 4px 0;
+  &.internal { border-color: #90caf9; background: #e3f2fd; }
+  &.ai-summary { border-color: #ce93d8; background: #f3e5f5; }
+  &.system { border-color: #a5d6a7; background: #e8f5e9; }
+
+  .note-header {
+    display: flex; gap: 8px; font-size: 12px; color: #666; margin-bottom: 4px;
+    .note-author { font-weight: 600; }
+    .note-badge { background: #ede7f6; border-radius: 3px; padding: 1px 5px; font-size: 11px; }
+  }
+  .note-body { font-size: 14px; white-space: pre-wrap; }
+}
+
+.add-note {
+  margin-top: 16px;
+  .full-width { width: 100%; display: block; }
+}
+
+.empty-msg { color: #888; font-size: 14px; }

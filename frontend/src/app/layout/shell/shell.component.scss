@@ -1,0 +1,57 @@
+.shell-container {
+  height: 100vh;
+}
+
+.sidenav {
+  width: 240px;
+  background: #1a237e;
+  color: white;
+
+  .sidenav-header {
+    padding: 24px 16px 8px;
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: white;
+    }
+    .subtitle {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+    }
+  }
+
+  mat-nav-list {
+    a {
+      color: rgba(255,255,255,0.85);
+      &.active-link {
+        background: rgba(255,255,255,0.15);
+        color: white;
+      }
+      &:hover {
+        background: rgba(255,255,255,0.1);
+      }
+    }
+  }
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.top-toolbar {
+  .spacer { flex: 1; }
+  .user-name {
+    font-size: 14px;
+    margin-right: 8px;
+  }
+}
+
+.content-area {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}

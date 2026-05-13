@@ -1,0 +1,51 @@
+<div class="ai-chat">
+  @if (errorMessage) {
+    <div class="error-banner">
+      {{ errorMessage }}
+      <button mat-icon-button (click)="errorMessage = ''"><mat-icon>close</mat-icon></button>
+    </div>
+  }
+
+  <div class="action-buttons">
+    <button mat-stroked-button (click)="summarize()" [disabled]="aiLoading">Summarize Ticket</button>
+    <button mat-stroked-button (click)="suggestReply()" [disabled]="aiLoading">Suggest Reply</button>
+  </div>
+
+  <div class="messages-container">
+    @if (loading) {
+      <div class="center"><mat-spinner diameter="32"></mat-spinner></div>
+    }
+    @for (msg of messages; track msg.id) {
+      <div class="message" [class]="msg.role.toLowerCase()">
+        <div class="message-header">
+          <span class="role">{{ msg.role }}</span>
+          @if (msg.model) { <span class="model">{{ msg.model }}</span> }
+          <span class="date">{{ msg.createdAt | date:'short' }}</span>
+        </div>
+        @if (msg.errorFlag) {
+          <div class="message-error">{{ msg.errorMessage ?? 'AI error occurred.' }}</div>
+        } @else {
+          <div class="message-content">{{ msg.content }}</div>
+        }
+        @if (msg.role === 'ASSISTANT' && !msg.errorFlag) {
+          <button mat-stroked-button color="accent" class="apply-btn" (click)="applyAsNote(msg)">
+            Apply as Note
+          </button>
+        }
+      </div>
+    }
+    <div #messagesEnd></div>
+  </div>
+
+  <div class="input-area">
+    <form [formGroup]="form" (ngSubmit)="send()" class="input-form">
+      <mat-form-field appearance="outline" class="flex-input">
+        <mat-label>Ask the AI assistant...</mat-label>
+        <textarea matInput formControlName="content" rows="2" (keydown.enter)="onEnter($event)"></textarea>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" [disabled]="aiLoading || form.invalid">
+        @if (aiLoading) { <mat-spinner diameter="20"></mat-spinner> } @else { Send }
+      </button>
+    </form>
+  </div>
+</div>

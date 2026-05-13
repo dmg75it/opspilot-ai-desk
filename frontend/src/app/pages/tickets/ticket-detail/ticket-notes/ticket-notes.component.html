@@ -1,0 +1,33 @@
+<div class="ticket-notes">
+  @if (loading) {
+    <div class="center"><mat-spinner diameter="32"></mat-spinner></div>
+  }
+
+  <div class="notes-list">
+    @for (note of notes; track note.id) {
+      <div class="note-item" [class]="visibilityClass(note.visibility)">
+        <div class="note-header">
+          <span class="note-author">{{ note.author.fullName }}</span>
+          <span class="note-badge">{{ note.visibility }}</span>
+          <span class="note-date">{{ note.createdAt | date:'short' }}</span>
+        </div>
+        <div class="note-body">{{ note.body }}</div>
+      </div>
+    }
+    @if (notes.length === 0 && !loading) {
+      <p class="empty-msg">No notes yet.</p>
+    }
+  </div>
+
+  <div class="add-note">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Add internal note</mat-label>
+        <textarea matInput formControlName="body" rows="3"></textarea>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" [disabled]="submitting || form.invalid">
+        @if (submitting) { <mat-spinner diameter="18"></mat-spinner> } @else { Add Note }
+      </button>
+    </form>
+  </div>
+</div>

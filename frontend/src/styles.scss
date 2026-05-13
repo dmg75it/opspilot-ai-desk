@@ -1,0 +1,106 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: #f5f5f5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.full-width {
+  width: 100%;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.error-banner {
+  background: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.empty-msg {
+  color: #888;
+  font-size: 14px;
+  padding: 16px 0;
+}
+
+.role-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &.role-admin { background: #e8eaf6; color: #283593; }
+  &.role-operator { background: #e0f2f1; color: #00695c; }
+}
+
+.note-item {
+  border-left: 3px solid #e0e0e0;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border-radius: 0 4px 4px 0;
+
+  &.internal { border-color: #90caf9; background: #e3f2fd; }
+  &.ai-summary { border-color: #ce93d8; background: #f3e5f5; }
+  &.system { border-color: #a5d6a7; background: #e8f5e9; }
+
+  .note-header {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+    .note-author { font-weight: 600; }
+    .note-badge {
+      background: #ede7f6;
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-size: 11px;
+    }
+  }
+  .note-body { font-size: 14px; white-space: pre-wrap; }
+}
+
+.add-note {
+  margin-top: 16px;
+}
+
+.ticket-form {
+  display: flex;
+  flex-direction: column;
+
+  .row-fields {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    mat-form-field { min-width: 180px; }
+  }
+
+  .actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+}
+
+.admin-page {
+  h1 { margin-top: 0; }
+}

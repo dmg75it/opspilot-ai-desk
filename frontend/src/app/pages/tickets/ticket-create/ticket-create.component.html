@@ -1,0 +1,71 @@
+<div class="ticket-create">
+  <h1>New Ticket</h1>
+
+  <mat-card>
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()" class="ticket-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Title</mat-label>
+          <input matInput formControlName="title" maxlength="150" />
+          @if (form.get('title')?.hasError('required') && form.get('title')?.touched) {
+            <mat-error>Title is required</mat-error>
+          }
+          @if (form.get('title')?.hasError('maxlength') && form.get('title')?.touched) {
+            <mat-error>Title must be 150 characters or less</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="6" maxlength="5000"></textarea>
+          @if (form.get('description')?.hasError('required') && form.get('description')?.touched) {
+            <mat-error>Description is required</mat-error>
+          }
+          @if (form.get('description')?.hasError('maxlength') && form.get('description')?.touched) {
+            <mat-error>Description must be 5000 characters or less</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="row-fields">
+          <mat-form-field appearance="outline">
+            <mat-label>Priority</mat-label>
+            <mat-select formControlName="priority">
+              @for (p of priorities; track p) {
+                <mat-option [value]="p">{{ p }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Category</mat-label>
+            <mat-select formControlName="category">
+              @for (c of categories; track c) {
+                <mat-option [value]="c">{{ c }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>External Reference (optional)</mat-label>
+            <input matInput formControlName="externalRef" />
+          </mat-form-field>
+        </div>
+
+        @if (errorMessage) {
+          <div class="error-banner">{{ errorMessage }}</div>
+        }
+
+        <div class="actions">
+          <button mat-button type="button" (click)="cancel()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="loading || form.invalid">
+            @if (loading) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              Create Ticket
+            }
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

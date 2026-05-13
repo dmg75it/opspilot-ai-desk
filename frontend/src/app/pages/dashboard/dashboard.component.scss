@@ -1,0 +1,50 @@
+.dashboard {
+  h1 { margin-top: 0; }
+  h2 { margin-top: 24px; margin-bottom: 12px; font-size: 18px; color: #333; }
+}
+
+.center { display: flex; justify-content: center; padding: 40px; }
+
+.error-banner {
+  background: #ffebee; color: #c62828;
+  border-radius: 4px; padding: 8px 12px; margin-bottom: 12px;
+}
+
+.ai-badge-row {
+  margin-bottom: 16px;
+  .ai-card {
+    display: inline-block;
+    mat-card-content {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .ai-count { font-size: 32px; font-weight: 700; color: #1a237e; }
+    .ai-label { font-size: 14px; color: #666; }
+  }
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.stat-card {
+  text-align: center;
+  .stat-number { font-size: 28px; font-weight: 700; color: #1a237e; }
+  .stat-label { font-size: 12px; color: #666; margin-top: 4px; }
+}
+
+.priority-grid {
+  .priority-low .stat-number { color: #2e7d32; }
+  .priority-medium .stat-number { color: #f57f17; }
+  .priority-high .stat-number { color: #e65100; }
+  .priority-critical .stat-number { color: #b71c1c; }
+}
+
+.full-width { width: 100%; }
+.empty-msg { color: #888; font-size: 14px; }
+
+table {
+  a { color: #1a237e; text-decoration: none; &:hover { text-decoration: underline; } }
+}
