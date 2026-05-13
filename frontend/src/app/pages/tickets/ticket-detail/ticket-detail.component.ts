@@ -110,7 +110,7 @@ export class TicketDetailComponent implements OnInit {
       reason: reason || undefined
     }).subscribe({
       next: (t) => { this.ticket = t; this.showStatusPanel = false; this.statusForm.reset(); },
-      error: () => { this.error = 'Failed to change status.'; }
+      error: (err) => { this.error = err?.error?.message ?? 'Failed to change status.'; }
     });
   }
 
@@ -126,7 +126,7 @@ export class TicketDetailComponent implements OnInit {
       version: this.ticket.version
     }).subscribe({
       next: (t) => { this.ticket = t; this.showEditPanel = false; },
-      error: () => { this.error = 'Failed to update ticket.'; }
+      error: (err) => { this.error = err?.error?.message ?? 'Failed to update ticket.'; }
     });
   }
 
@@ -135,7 +135,7 @@ export class TicketDetailComponent implements OnInit {
     const { operatorId } = this.assignForm.value;
     this.ticketService.assign(this.ticket.id, { operatorId: operatorId! }).subscribe({
       next: (t) => { this.ticket = t; this.showAssignPanel = false; this.assignForm.reset(); },
-      error: () => { this.error = 'Failed to assign ticket.'; }
+      error: (err) => { this.error = err?.error?.message ?? 'Failed to assign ticket.'; }
     });
   }
 
