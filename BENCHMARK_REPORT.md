@@ -445,4 +445,22 @@ Session
   ███████                                            14% used
   Resets May 16, 8am (Europe/Rome)
 
+
 Troubleshouting avviato alle 16:02, completato alle 16:45
+Session
+
+  Total cost:            $18.82
+  Total duration (API):  1h 11m 44s
+  Total duration (wall): 2h 21m 27s
+  Total code changes:    6851 lines added, 155 lines removed
+  Usage by model:
+      claude-haiku-4-5:  685 input, 20 output, 0 cache read, 0 cache write ($0.0008)
+     claude-sonnet-4-6:  6.1k input, 236.1k output, 43.1m cache read, 617.7k cache write ($18.82)
+
+  Current session
+  ██████████████████████████████████████████████     92% used
+  Resets 7:10pm (Europe/Rome)
+
+  Current week (all models)
+  ██████████                                         20% used
+  Resets May 16, 8am (Europe/Rome)
