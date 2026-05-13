@@ -265,6 +265,98 @@ This was a missing configuration entry, not a logic or architectural bug. The An
 
 ---
 
+## 5c. Post-Deploy Issue: UI Non-Functional (Field Name Mismatches)
+
+### Symptom
+
+After deploying the full stack, the UI was non-functional for the core ticket operations:
+- Assigning a ticket to an operator had no effect or threw an error.
+- Changing ticket status always produced "Failed to change status." with no explanation.
+- Ticket detail page showed blank fields for "Created By" and "Assigned To".
+- Notes showed blank author names.
+- There was no way to edit ticket title, description, priority, or category from the UI.
+
+### Diagnosis
+
+Direct API testing confirmed the backend was working correctly. The root cause was a mismatch between the TypeScript models in the frontend and the JSON field names returned by the backend.
+
+The frontend agent generated TypeScript interfaces with nested `User` objects, while the backend DTOs returned flat string/id fields:
+
+| Location | Frontend (wrong) | Backend (actual) |
+|----------|-----------------|-----------------|
+| `Ticket.createdBy` | `User` object | `createdByName: string`, `createdById: number` |
+| `Ticket.assignedTo` | `User` object | `assignedToName: string`, `assignedToId: number` |
+| `TicketNote.author` | `User` object | `authorName: string`, `authorId: number` |
+| `ChangeStatusRequest` | `newStatus: TicketStatus` | `status: TicketStatus` |
+
+The `ChangeStatusRequest.newStatus` mismatch meant every status change request was rejected by the backend with a 400 validation error (`newStatus` was null). The nested `User` mismatches caused Angular template bindings to fail silently — the fields rendered as blank rather than throwing errors.
+
+Additionally, the generic error handler `error: () => { this.error = 'Failed to change status.'; }` discarded the actual backend error message, making diagnosis harder from the UI.
+
+### Root Cause
+
+The frontend agent designed models independently without cross-checking the backend `TicketResponse` and `TicketNoteResponse` DTOs. The backend was deliberately designed to return flat fields to avoid lazy-loading issues (Hibernate `LazyInitializationException` — a bug fixed during backend development). The frontend agent was not aware of this decision and designed its own interface shape.
+
+### Fix Applied
+
+**`ticket.model.ts`** — replaced nested User objects with flat fields:
+```typescript
+// Before
+assignedTo?: User;
+createdBy: User;
+// After
+assignedToId?: number;
+assignedToName?: string;
+createdById: number;
+createdByName: string;
+```
+
+**`ChangeStatusRequest`** — renamed field to match backend:
+```typescript
+// Before: newStatus: TicketStatus
+// After:  status: TicketStatus
+```
+
+**`ticket-detail.component.ts`** — fixed `statusForm` control name (`newStatus` → `status`), fixed `changeStatus()` payload, added `editForm` with `saveEdit()` method for title/description/priority/category updates.
+
+**`ticket-detail.component.html`** — fixed all template bindings; added Edit panel with full form (title, description, priority, category, external ref).
+
+**`ticket-list.component.html`** — `t.assignedTo?.fullName` → `t.assignedToName`.
+
+**`ticket-notes.component.html`** — `note.author.fullName` → `note.authorName`.
+
+**Error messages** — replaced all hardcoded generic strings with `err?.error?.message ?? 'fallback'` so the backend's specific reason (e.g. "Invalid status transition from NEW to RESOLVED") is shown directly in the UI.
+
+### Verification
+
+```bash
+# Status change (correct field name)
+curl -X POST .../api/tickets/5/status -d '{"status":"IN_PROGRESS"}'
+# → 200 OK, status: "IN_PROGRESS"
+
+# Assign ticket
+curl -X POST .../api/tickets/5/assign -d '{"operatorId":2}'
+# → 200 OK, assignedToName: "Operator User"
+
+# Add note
+curl -X POST .../api/tickets/5/notes -d '{"body":"Test note"}'
+# → 201, authorName: "Admin User"
+
+# Update ticket
+curl -X PUT .../api/tickets/5 -d '{"title":"Updated","priority":"CRITICAL","version":1,...}'
+# → 200 OK, title: "Updated", priority: "CRITICAL"
+```
+
+All 18 frontend unit tests continued to pass before and after the fix.
+
+### Impact on Generated Code Quality
+
+This was a **cross-agent coordination failure**: two independent agents (backend and frontend) designed their data contracts separately without a shared schema. The backend serialization format was influenced by a runtime bug fix (lazy loading) that the frontend agent was never informed of. The fix required aligning the frontend models to the actual API responses.
+
+The missing Edit form was a functional gap: the `ticketService.update()` method existed in the service layer but no UI panel exposed it to the user.
+
+---
+
 ## 6. Known Limitations
 
 1. **No JWT refresh token** — sessions expire after 24 hours.
@@ -353,4 +445,4 @@ Session
   ███████                                            14% used
   Resets May 16, 8am (Europe/Rome)
 
-Troubleshouting avviato alle 16:02
+Troubleshouting avviato alle 16:02, completato alle 16:45
