@@ -147,18 +147,23 @@
 | UI-02 | Phase 8 | Pending |
 | UI-03 to UI-05 | Phase 6 | Pending |
 | UI-06 | Phase 7 | Pending |
-| UI-07 to UI-09 | Phase 5 | Pending |
-| INFRA-01 to INFRA-07 | Phase 1 | Pending |
-| TEST-01 to TEST-02 | Phase 2 | Pending |
-| TEST-03 to TEST-04 | Phase 3 | Pending |
+| UI-07 | Phase 8 | Pending |
+| UI-08 to UI-09 | Phase 5 | Pending |
+| INFRA-01 to INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 5 | Pending |
+| INFRA-05 | Phase 9 | Pending |
+| INFRA-06 to INFRA-07 | Phase 1 | Pending |
+| TEST-01 | Phase 2 | Pending |
+| TEST-02 | Phase 3 | Pending |
+| TEST-03 to TEST-04 | Phase 9 | Pending |
 | TEST-05 to TEST-06 | Phase 5 | Pending |
 | DOC-01 to DOC-05 | Phase 9 | Pending |
 
 **Coverage:**
-- v1 requirements: 57 total
-- Mapped to phases: 57
+- v1 requirements: 70 total
+- Mapped to phases: 70
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-14*
-*Last updated: 2026-05-14 after initial definition*
+*Last updated: 2026-05-14 — traceability updated after roadmap creation*
