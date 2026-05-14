@@ -35,6 +35,9 @@
 ### Infrastructure
 
 - **docker-compose.yml**: PostgreSQL 16 with healthcheck, persistent volume, full-stack profile
+- **backend/Dockerfile**: multi-stage build (Maven 3.9 + JDK 21 → eclipse-temurin:21-jre-alpine)
+- **frontend/Dockerfile**: multi-stage build (Node 20 build → nginx:alpine), with nginx reverse proxy for `/api`
+- **frontend/nginx.conf**: SPA routing + `/api` proxy to backend container
 - **.env.example**: all required variables documented
 - **Makefile**: up, down, backend, frontend, test-backend, test-frontend, build, full-stack-up, logs, clean
 - **.gitignore**: Java/Maven, Node/Angular, IDE, secrets, OS
@@ -44,7 +47,6 @@
 
 ## 2. What Was NOT Implemented
 
-- **Dockerfile** for backend and frontend (full-stack Docker profile is defined but Dockerfiles not provided — local dev uses direct run commands)
 - **User registration endpoint** — users are seeded via DataInitializer
 - **Email notifications**
 - **File attachments** on tickets
@@ -208,7 +210,7 @@ Tutti i flussi AI funzionano correttamente end-to-end. L'integrazione OpenRouter
 
 ### Architecture
 
-- **No Dockerfile**: full-stack Docker profile defined in docker-compose but Dockerfiles for backend/frontend are not provided.
+- **Full-stack Docker**: Dockerfiles provided for backend and frontend; `make full-stack-up` / `docker compose --profile full-stack up --build` builds and starts all three services.
 - **No pagination on notes/audit**: notes and audit trail are returned as full lists without pagination.
 - **MapStruct not used**: spec listed it as a dependency; inline mapping was used instead for simplicity.
 - **Token refresh**: no refresh token mechanism; access token expires after `JWT_EXPIRATION_MS` (default 24h).
@@ -224,7 +226,7 @@ Tutti i flussi AI funzionano correttamente end-to-end. L'integrazione OpenRouter
 ## 7. Suggested Next Improvements
 
 1. **Fix integration tests**: upgrade to Testcontainers 1.21.x or override docker-java to 3.4.x to support Docker 26+.
-2. **Add Dockerfiles**: create `backend/Dockerfile` (multi-stage Maven + JRE) and `frontend/Dockerfile` (Node build + nginx) for full Docker deployment.
+2. **Optimize Docker images**: reduce build time with a local Maven cache volume in CI; add health-check to frontend nginx container.
 3. **Refresh tokens**: implement refresh token flow for better UX and security.
 4. **Real-time updates**: add SSE or WebSocket for live ticket updates and AI streaming responses.
 5. **Toast notifications**: replace `alert()` with a proper notification component.
@@ -235,3 +237,6 @@ Tutti i flussi AI funzionano correttamente end-to-end. L'integrazione OpenRouter
 10. **CI/CD pipeline**: add GitHub Actions workflow for automated testing on every push.
 11. **AI streaming**: implement streaming responses from OpenRouter for better UX.
 12. **Rate limiting**: add rate limiting on AI endpoints to control OpenRouter costs.
+
+
+

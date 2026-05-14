@@ -51,6 +51,25 @@ make frontend
 
 The frontend starts on `http://localhost:4200`.
 
+### Full-stack with Docker
+
+To run the entire stack (PostgreSQL + backend + frontend) via Docker:
+
+```bash
+make full-stack-up
+# or: docker compose --profile full-stack up --build -d
+```
+
+Services:
+- PostgreSQL: port 5432
+- Backend API: `http://localhost:8080`
+- Frontend: `http://localhost:4200` (nginx on port 80, proxies `/api` to backend)
+
+```bash
+make down        # stop all services
+make logs        # follow logs
+```
+
 ### Seed credentials
 
 | Email | Password | Role |
