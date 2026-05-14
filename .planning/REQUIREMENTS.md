@@ -7,10 +7,10 @@
 
 ### Authentication
 
-- [ ] **AUTH-01**: User can log in with email and password and receive a JWT token
-- [ ] **AUTH-02**: User can access a "current user" endpoint to retrieve their profile and role
-- [ ] **AUTH-03**: JWT token is validated on every protected request (filter chain)
-- [ ] **AUTH-04**: ADMIN role can access all resources; OPERATOR role is restricted to their own operations
+- [x] **AUTH-01**: User can log in with email and password and receive a JWT token
+- [x] **AUTH-02**: User can access a "current user" endpoint to retrieve their profile and role
+- [x] **AUTH-03**: JWT token is validated on every protected request (filter chain)
+- [x] **AUTH-04**: ADMIN role can access all resources; OPERATOR role is restricted to their own operations
 - [x] **AUTH-05**: Passwords are hashed with BCrypt in the database
 - [x] **AUTH-06**: Seed users are created on first run (admin@example.com / ADMIN, operator@example.com / OPERATOR)
 - [ ] **AUTH-07**: Frontend stores JWT and attaches it to all API requests via HTTP interceptor
