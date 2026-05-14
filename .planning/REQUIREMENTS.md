@@ -11,8 +11,8 @@
 - [ ] **AUTH-02**: User can access a "current user" endpoint to retrieve their profile and role
 - [ ] **AUTH-03**: JWT token is validated on every protected request (filter chain)
 - [ ] **AUTH-04**: ADMIN role can access all resources; OPERATOR role is restricted to their own operations
-- [ ] **AUTH-05**: Passwords are hashed with BCrypt in the database
-- [ ] **AUTH-06**: Seed users are created on first run (admin@example.com / ADMIN, operator@example.com / OPERATOR)
+- [x] **AUTH-05**: Passwords are hashed with BCrypt in the database
+- [x] **AUTH-06**: Seed users are created on first run (admin@example.com / ADMIN, operator@example.com / OPERATOR)
 - [ ] **AUTH-07**: Frontend stores JWT and attaches it to all API requests via HTTP interceptor
 - [ ] **AUTH-08**: Frontend route guard redirects unauthenticated users to login page
 - [ ] **AUTH-09**: Frontend route guard enforces role-based access to admin pages
@@ -78,7 +78,7 @@
 ### Infrastructure and Developer Experience
 
 - [ ] **INFRA-01**: Docker Compose file with PostgreSQL service
-- [ ] **INFRA-02**: Flyway migrations create all tables with correct constraints and indexes
+- [x] **INFRA-02**: Flyway migrations create all tables with correct constraints and indexes
 - [ ] **INFRA-03**: Backend runs via `mvn spring-boot:run` with .env variable support
 - [ ] **INFRA-04**: Frontend runs via `npm start` with proxy to backend
 - [ ] **INFRA-05**: `.env.example` documents all required environment variables

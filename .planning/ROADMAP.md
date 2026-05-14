@@ -35,7 +35,7 @@ Build a production-oriented field operations support desk from the ground up: in
 **Plans**: 4 plans
 Plans:
 - [ ] 01-01-PLAN.md — Maven project scaffold, Docker Compose, Makefile, .env.example, .gitignore
-- [ ] 01-02-PLAN.md — Flyway migrations V1 (users table) and V2 (seed users)
+- [x] 01-02-PLAN.md — Flyway migrations V1 (users table) and V2 (seed users)
 - [ ] 01-03-PLAN.md — Spring Security JWT auth: entity, JwtService, JwtAuthFilter, SecurityConfig, AuthController
 - [ ] 01-04-PLAN.md — Integration and verification: Testcontainers, JwtServiceTest, AuthControllerIntegrationTest
 
@@ -139,7 +139,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure and Auth Foundation | 0/4 | Planned | - |
+| 1. Infrastructure and Auth Foundation | 1/4 | In Progress|  |
 | 2. Ticket Core Backend | 0/? | Not started | - |
 | 3. AI Chat Backend | 0/? | Not started | - |
 | 4. Dashboard Backend | 0/? | Not started | - |
