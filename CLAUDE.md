@@ -1,5 +1,22 @@
 # CLAUDE.md
 
+## MANDATORY: GSD Workflow Enforcement
+
+**You MUST use the GSD workflow for ALL implementation work. No exceptions.**
+
+- NEVER write or edit source files directly with Write/Edit tools.
+- ALWAYS go through the workflow:
+  1. `/gsd-plan-phase <N>` — to plan a phase
+  2. `/gsd-execute-phase <N>` — to execute it
+  3. `/gsd-fast` — only for trivial one-line fixes explicitly requested by the user
+- If you find yourself about to call Write or Edit on a source file without an active GSD phase, **STOP** and invoke the workflow first.
+- STATE.md and ROADMAP.md must reflect actual progress after every phase.
+- "YOLO mode" and "autonomous" mean: run the GSD workflow autonomously without asking for confirmation — they do NOT mean bypass the workflow.
+
+A PreToolUse hook will **BLOCK** any direct Write/Edit to source files. If blocked, do not retry — invoke the GSD workflow.
+
+---
+
 ## Project: AI Support Desk for Field Operations
 
 You are working on a greenfield full-stack project named **OpsPilot AI Desk**.
