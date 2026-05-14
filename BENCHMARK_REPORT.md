@@ -56,7 +56,7 @@
 - **Frontend charts** for dashboard (tables/lists used instead, charts are listed as optional in spec)
 - **Password change** endpoint
 - **Audit log UI** (backend endpoint exists, not exposed in frontend)
-- ~~**Ticket assignment UI**~~: fixed — ticket-detail now has "Assign to me", "Unassign", and (ADMIN only) operator dropdown
+- **Ticket assignment UI** (backend endpoint existed, no UI wired — fixed post-workflow, see §8)
 
 ---
 
@@ -221,7 +221,7 @@ Tutti i flussi AI funzionano correttamente end-to-end. L'integrazione OpenRouter
 - **No auto-scroll in AI chat**: new messages do not auto-scroll the chat window.
 - **Alert() for AI apply note**: uses browser `alert()` instead of a proper toast notification.
 - **ngFor with *ngFor directive**: ticket-list uses `*ngFor` directive syntax (compatible, but inconsistent with `@for` control flow syntax used elsewhere).
-- ~~**Zone.js missing from production build**~~: fixed — `zone.js` added to `polyfills` in `angular.json`; without it the Angular router silently fails with `NG0908` in production builds.
+- **Zone.js missing from production build**: Angular router silently failed with `NG0908` — fixed post-workflow, see §8.
 
 ---
 
@@ -240,5 +240,67 @@ Tutti i flussi AI funzionano correttamente end-to-end. L'integrazione OpenRouter
 11. **AI streaming**: implement streaming responses from OpenRouter for better UX.
 12. **Rate limiting**: add rate limiting on AI endpoints to control OpenRouter costs.
 
+---
 
+## 8. Post-Feature-Dev Corrections
 
+This section documents defects and missing features discovered after the feature-dev workflow completed (after commit `6177c07`). They were not caught during the benchmark because the workflow verified backend API and unit tests only — no full-stack Docker run or browser UI test was performed during the feature-dev session.
+
+### Bug — nginx startup crash (`bd1ba4a`)
+
+**Symptom**: `make full-stack-up` started all containers, but the frontend container immediately entered a restart loop. Browser returned _connection reset_.
+
+**Root cause**: nginx resolves all `upstream` / `proxy_pass` hostnames at config load time. The `backend` hostname (a Docker service name) was not resolvable at the moment nginx started, because Docker DNS is not guaranteed to be ready before the first nginx worker initializes. nginx exited with:
+```
+host not found in upstream "backend" in /etc/nginx/conf.d/default.conf
+```
+
+**Fix**: Added `resolver 127.0.0.11 valid=10s;` (Docker's internal DNS server) and changed `proxy_pass` to use a variable (`set $backend http://backend:8080`). Using a variable forces nginx to resolve the hostname lazily at request time rather than at startup, so nginx starts regardless of whether the backend container is ready.
+
+**Files changed**: `frontend/nginx.conf`
+
+---
+
+### Bug — blank white page in production build (`28ffebf`)
+
+**Symptom**: After the nginx fix the frontend container started correctly (HTTP 200), but the browser showed a completely blank page. Dev mode (`ng serve`) worked fine.
+
+**Root cause**: Angular error `NG0908` — Zone.js was not included in the production bundle. The Angular `@angular/build:application` builder (used in Angular 21) does **not** automatically bundle Zone.js; it must be explicitly declared in the `polyfills` array in `angular.json`. The development server (Vite) includes Zone.js implicitly, masking the omission. Without Zone.js, Angular's default change detection cannot initialize, `bootstrapApplication` fails silently, and `<app-root>` remains empty.
+
+The error was confirmed via Chrome DevTools Protocol:
+```
+Error: NG0908
+  at new NgZone (chunk-5YXT3C6W.js)
+  at Object.ngZoneFactory (chunk-5YXT3C6W.js)
+```
+
+**Fix**: Added `"polyfills": ["zone.js"]` to the `options` block in `angular.json`. `zone.js` was already present in `package.json` as a direct dependency; it simply was not referenced by the build configuration.
+
+**Files changed**: `frontend/angular.json`
+
+---
+
+### Missing feature — ticket assignment UI (`bb5a94d`)
+
+**Symptom**: No way to assign a ticket to an operator from the web interface. The "Assigned to" field was display-only.
+
+**Root cause**: The backend `PATCH /api/tickets/{id}/assign` endpoint was fully implemented and `TicketService.assign()` existed in the Angular service layer, but no UI component called it. The ticket-detail page template had no assignment controls.
+
+**Fix**: Added an **Assignment** section to the ticket-detail page:
+- **"Assign to me"** button — calls `assign(ticketId, currentUser.id)`, available to all authenticated users.
+- **"Unassign"** button — calls `assign(ticketId, null)`, visible when the ticket is currently assigned.
+- **Operator dropdown** (ADMIN only) — loads all users via `GET /api/admin/users` and calls `assign(ticketId, selectedOperatorId)`.
+
+**Files changed**: `frontend/src/app/pages/ticket-detail/ticket-detail.component.ts`
+
+---
+
+### Summary
+
+| # | Type | Description | Commit | Detected by |
+|---|------|-------------|--------|-------------|
+| 1 | Bug | nginx crashes on startup — upstream `backend` not resolvable at config load time | `bd1ba4a` | Manual `make full-stack-up` run |
+| 2 | Bug | Production frontend blank — Zone.js not declared in `angular.json` polyfills (`NG0908`) | `28ffebf` | Browser inspection + Chrome DevTools Protocol |
+| 3 | Missing feature | No UI to assign tickets to operators despite backend endpoint existing | `bb5a94d` | Manual UI walkthrough |
+
+All three issues would have been caught by a mandatory full-stack Docker smoke test and a UI acceptance checklist as part of the feature-dev workflow's Definition of Done.
