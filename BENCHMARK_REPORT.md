@@ -320,3 +320,79 @@ Error: NG0908
 | 4 | Missing feature | No UI to assign tickets to operators despite backend endpoint existing | `bb5a94d` | Manual UI walkthrough |
 
 All four issues would have been caught by a mandatory full-stack Docker smoke test and a UI acceptance checklist as part of the feature-dev workflow's Definition of Done.
+
+
+2026-05-14 12:13 feature-dev
+Session
+
+  Total cost:            $0.0000
+  Total duration (API):  0s
+  Total duration (wall): 1m 24s
+  Total code changes:    0 lines added, 0 lines removed
+  Usage:                 0 input, 0 output, 0 cache read, 0 cache write
+
+  Current session
+  ██████████████████████████████████████████████████ 100% used
+  Resets 2:50pm (Europe/Rome)
+
+  Current week (all models)
+  ████▌                                              9% used
+  Resets May 15, 1pm (Europe/Rome)
+  
+2026-05-14 12:55
+Session
+
+  Total cost:            $8.18
+  Total duration (API):  33m 2s
+  Total duration (wall): 38m 53s
+  Total code changes:    4950 lines added, 370 lines removed
+  Usage by model:
+     claude-sonnet-4-6:  259 input, 169.9k output, 13.4m cache read, 424.7k cache write ($8.18)
+      claude-haiku-4-5:  380 input, 15 output, 0 cache read, 0 cache write ($0.0005)
+
+  Current session
+  ██████████████████████████████████████████████████ 100% used
+  Resets 2:50pm (Europe/Rome)
+
+  Current week (all models)
+  ████▌                                              9% used
+  Resets May 15, 1pm (Europe/Rome)
+  
+2026-05-14 13:10   troubleshouting
+ Session
+
+  Total cost:            $10.89
+  Total duration (API):  37m 26s
+  Total duration (wall): 2h 0m 22s
+  Total code changes:    5026 lines added, 371 lines removed
+  Usage by model:
+     claude-sonnet-4-6:  306 input, 182.7k output, 19.7m cache read, 596.8k cache write ($10.89)
+      claude-haiku-4-5:  380 input, 15 output, 0 cache read, 0 cache write ($0.0005)
+
+  Current session
+  ██████████████████████████████████████████████████ 100% used
+  Resets 2:50pm (Europe/Rome)
+
+  Current week (all models)
+  ████▌                                              9% used
+  Resets May 15, 1pm (Europe/Rome)
+
+2026-05-14 15:00   troubleshouting
+ Session
+
+ Total cost:            $15.49
+  Total duration (API):  54m 5s
+  Total duration (wall): 2h 45m 4s
+  Total code changes:    5276 lines added, 382 lines removed
+  Usage by model:
+     claude-sonnet-4-6:  3.4k input, 238.0k output, 29.2m cache read, 839.9k cache write ($15.49)
+      claude-haiku-4-5:  380 input, 15 output, 0 cache read, 0 cache write ($0.0005)
+
+  Current session
+  ██▌                                                5% used
+  Resets 7:49pm (Europe/Rome)
+
+  Current week (all models)
+  ████▌                                              9% used
+  Resets May 15, 1pm (Europe/Rome)
+
