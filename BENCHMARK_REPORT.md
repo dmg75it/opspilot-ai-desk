@@ -295,12 +295,28 @@ Error: NG0908
 
 ---
 
+### Missing feature — Dockerfiles (`6177c07`)
+
+**Symptom**: `make full-stack-up` failed immediately with build errors — Docker could not find `backend/Dockerfile` or `frontend/Dockerfile`, even though `docker-compose.yml` referenced both.
+
+**Root cause**: The feature-dev workflow generated a `docker-compose.yml` with a `full-stack` profile that referenced `./backend/Dockerfile` and `./frontend/Dockerfile`, but neither file was ever created. The workflow verified the backend and frontend only via direct run commands (`mvn spring-boot:run`, `npm start`), so the Docker build path was never exercised.
+
+**Fix**: Created both Dockerfiles and an nginx config:
+- `backend/Dockerfile` — multi-stage: Maven 3.9 + JDK 21 build stage → `eclipse-temurin:21-jre-alpine` runtime
+- `frontend/Dockerfile` — multi-stage: Node 20 build stage → `nginx:alpine` serving static files
+- `frontend/nginx.conf` — SPA routing (`try_files`) + `/api` reverse proxy to backend container
+
+**Files changed**: `backend/Dockerfile`, `frontend/Dockerfile`, `frontend/nginx.conf`
+
+---
+
 ### Summary
 
 | # | Type | Description | Commit | Detected by |
 |---|------|-------------|--------|-------------|
-| 1 | Bug | nginx crashes on startup — upstream `backend` not resolvable at config load time | `bd1ba4a` | Manual `make full-stack-up` run |
-| 2 | Bug | Production frontend blank — Zone.js not declared in `angular.json` polyfills (`NG0908`) | `28ffebf` | Browser inspection + Chrome DevTools Protocol |
-| 3 | Missing feature | No UI to assign tickets to operators despite backend endpoint existing | `bb5a94d` | Manual UI walkthrough |
+| 1 | Missing feature | Dockerfiles absent — `make full-stack-up` failed at build step | `6177c07` | Manual `make full-stack-up` run |
+| 2 | Bug | nginx crashes on startup — upstream `backend` not resolvable at config load time | `bd1ba4a` | Manual `make full-stack-up` run |
+| 3 | Bug | Production frontend blank — Zone.js not declared in `angular.json` polyfills (`NG0908`) | `28ffebf` | Browser inspection + Chrome DevTools Protocol |
+| 4 | Missing feature | No UI to assign tickets to operators despite backend endpoint existing | `bb5a94d` | Manual UI walkthrough |
 
-All three issues would have been caught by a mandatory full-stack Docker smoke test and a UI acceptance checklist as part of the feature-dev workflow's Definition of Done.
+All four issues would have been caught by a mandatory full-stack Docker smoke test and a UI acceptance checklist as part of the feature-dev workflow's Definition of Done.
