@@ -172,6 +172,7 @@ CLOSED -> (none)
 ## Known Limitations
 
 - Integration tests skip in environments with Docker 26+ due to docker-java API version mismatch (client uses API 1.32, Docker 29.x requires minimum 1.40). Unit tests pass.
+- `zone.js` must be listed in `polyfills` in `angular.json` for production builds to work (Angular error `NG0908`). Already fixed.
 - No user registration endpoint — users are seeded or manually inserted.
 - No email notifications.
 - No file attachments on tickets.

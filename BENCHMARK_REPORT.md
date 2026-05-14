@@ -220,6 +220,7 @@ Tutti i flussi AI funzionano correttamente end-to-end. L'integrazione OpenRouter
 - **No auto-scroll in AI chat**: new messages do not auto-scroll the chat window.
 - **Alert() for AI apply note**: uses browser `alert()` instead of a proper toast notification.
 - **ngFor with *ngFor directive**: ticket-list uses `*ngFor` directive syntax (compatible, but inconsistent with `@for` control flow syntax used elsewhere).
+- ~~**Zone.js missing from production build**~~: fixed — `zone.js` added to `polyfills` in `angular.json`; without it the Angular router silently fails with `NG0908` in production builds.
 
 ---
 
