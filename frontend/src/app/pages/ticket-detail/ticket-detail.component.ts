@@ -4,8 +4,10 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { TicketService } from '../../services/ticket.service';
 import { ChatService } from '../../services/chat.service';
+import { UserService } from '../../services/user.service';
 import { Ticket, TicketNote } from '../../models/ticket.model';
 import { ChatMessage, ChatSession } from '../../models/chat.model';
+import { User } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -47,6 +49,29 @@ import { AuthService } from '../../services/auth.service';
               <div class="status-actions">
                 @for (s of getAvailableStatuses(); track s) {
                   <button (click)="changeStatus(s)" class="btn-status">{{ s }}</button>
+                }
+              </div>
+            </div>
+
+            <div class="section-card">
+              <h3>Assignment</h3>
+              <div class="assign-current">
+                @if (ticket.assignedTo) {
+                  <span class="assigned-label">Assigned to <strong>{{ ticket.assignedTo.fullName }}</strong></span>
+                  <button (click)="unassign()" class="btn-unassign">Unassign</button>
+                } @else {
+                  <span class="unassigned-label">Not assigned</span>
+                }
+              </div>
+              <div class="assign-actions">
+                <button (click)="assignToMe()" class="btn-assign-me">Assign to me</button>
+                @if (auth.isAdmin() && operators.length > 0) {
+                  <select (change)="assignToOperator($event)" class="assign-select">
+                    <option value="">— assign to operator —</option>
+                    @for (op of operators; track op.id) {
+                      <option [value]="op.id">{{ op.fullName }}</option>
+                    }
+                  </select>
                 }
               </div>
             </div>
@@ -160,6 +185,15 @@ import { AuthService } from '../../services/auth.service';
     .priority-high { background: #fed7aa; color: #9a3412; }
     .priority-critical { background: #fee2e2; color: #dc2626; }
     .category-badge { background: #e0e7ff; color: #3730a3; }
+    .assign-current { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .assigned-label { font-size: 14px; color: #374151; }
+    .unassigned-label { font-size: 14px; color: #94a3b8; }
+    .btn-unassign { padding: 4px 12px; border: 1px solid #dc2626; color: #dc2626; background: white; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    .btn-unassign:hover { background: #fee2e2; }
+    .assign-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .btn-assign-me { padding: 6px 16px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .btn-assign-me:hover { background: #4f46e5; }
+    .assign-select { padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; background: white; cursor: pointer; }
     @media (max-width: 900px) { .detail-layout { grid-template-columns: 1fr; } }
   `]
 })
@@ -168,6 +202,7 @@ export class TicketDetailComponent implements OnInit {
   private router = inject(Router);
   private ticketService = inject(TicketService);
   private chatService = inject(ChatService);
+  private userService = inject(UserService);
   auth = inject(AuthService);
   private fb = inject(FormBuilder);
 
@@ -175,6 +210,7 @@ export class TicketDetailComponent implements OnInit {
   notes: TicketNote[] = [];
   chatMessages: ChatMessage[] = [];
   chatSession: ChatSession | null = null;
+  operators: User[] = [];
   loading = false;
   error = '';
   aiLoading = false;
@@ -195,6 +231,9 @@ export class TicketDetailComponent implements OnInit {
       },
       error: () => { this.error = 'Ticket not found'; this.loading = false; }
     });
+    if (this.auth.isAdmin()) {
+      this.userService.listAll().subscribe(users => this.operators = users);
+    }
   }
 
   loadNotes() {
@@ -257,6 +296,34 @@ export class TicketDetailComponent implements OnInit {
     this.chatService.applyAsSummary(this.ticket!.id, msg.id).subscribe({
       next: note => { this.notes.push(note); alert('AI summary applied as note!'); },
       error: () => alert('Failed to apply note')
+    });
+  }
+
+  assignToMe() {
+    const me = this.auth.currentUser();
+    if (!me) return;
+    this.ticketService.assign(this.ticket!.id, me.id).subscribe({
+      next: t => this.ticket = t,
+      error: () => this.error = 'Failed to assign ticket'
+    });
+  }
+
+  unassign() {
+    this.ticketService.assign(this.ticket!.id, null).subscribe({
+      next: t => this.ticket = t,
+      error: () => this.error = 'Failed to unassign ticket'
+    });
+  }
+
+  assignToOperator(event: Event) {
+    const operatorId = (event.target as HTMLSelectElement).value;
+    if (!operatorId) return;
+    this.ticketService.assign(this.ticket!.id, operatorId).subscribe({
+      next: t => {
+        this.ticket = t;
+        (event.target as HTMLSelectElement).value = '';
+      },
+      error: () => this.error = 'Failed to assign ticket'
     });
   }
 

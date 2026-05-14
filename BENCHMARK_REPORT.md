@@ -56,6 +56,7 @@
 - **Frontend charts** for dashboard (tables/lists used instead, charts are listed as optional in spec)
 - **Password change** endpoint
 - **Audit log UI** (backend endpoint exists, not exposed in frontend)
+- ~~**Ticket assignment UI**~~: fixed — ticket-detail now has "Assign to me", "Unassign", and (ADMIN only) operator dropdown
 
 ---
 
