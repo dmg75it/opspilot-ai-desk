@@ -32,7 +32,12 @@ Build a production-oriented field operations support desk from the ground up: in
   3. GET /api/auth/me with a valid JWT returns the current user's email and role
   4. A request to any protected endpoint without a JWT receives HTTP 401
   5. CORS pre-flight requests from localhost:4200 receive correct headers
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 01-01-PLAN.md — Maven project scaffold, Docker Compose, Makefile, .env.example, .gitignore
+- [ ] 01-02-PLAN.md — Flyway migrations V1 (users table) and V2 (seed users)
+- [ ] 01-03-PLAN.md — Spring Security JWT auth: entity, JwtService, JwtAuthFilter, SecurityConfig, AuthController
+- [ ] 01-04-PLAN.md — Integration and verification: Testcontainers, JwtServiceTest, AuthControllerIntegrationTest
 
 ### Phase 2: Ticket Core Backend
 **Goal**: Deliver a fully functional ticket management backend with validated status transitions, optimistic locking, notes, an audit trail, and unit tests for transition rules.
@@ -134,7 +139,7 @@ Build a production-oriented field operations support desk from the ground up: in
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Infrastructure and Auth Foundation | 0/? | Not started | - |
+| 1. Infrastructure and Auth Foundation | 0/4 | Planned | - |
 | 2. Ticket Core Backend | 0/? | Not started | - |
 | 3. AI Chat Backend | 0/? | Not started | - |
 | 4. Dashboard Backend | 0/? | Not started | - |
