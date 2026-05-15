@@ -114,7 +114,7 @@ import { AiChatPanelComponent } from '../../ai-chat/ai-chat-panel.component';
         </mat-tab>
         <mat-tab label="AI Assistant">
           <div style="padding:1rem">
-            <app-ai-chat-panel [ticketId]="ticket()!.id"></app-ai-chat-panel>
+            <app-ai-chat-panel [ticketId]="ticket()!.id" (noteAdded)="loadNotes(ticket()!.id)"></app-ai-chat-panel>
           </div>
         </mat-tab>
       </mat-tab-group>

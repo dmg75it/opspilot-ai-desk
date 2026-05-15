@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, signal } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -66,6 +66,7 @@ import { ChatMessage } from '../../core/models/chat.model';
 })
 export class AiChatPanelComponent implements OnInit {
   @Input() ticketId!: string;
+  @Output() noteAdded = new EventEmitter<void>();
   messages = signal<ChatMessage[]>([]);
   messageControl = new FormControl('');
   aiLoading = signal(false);
@@ -119,7 +120,7 @@ export class AiChatPanelComponent implements OnInit {
     const result = this.actionResult();
     if (!result) return;
     this.aiService.applySummaryAsNote(this.ticketId, result).subscribe({
-      next: () => { this.noteApplied.set(true); this.actionResult.set(null); },
+      next: () => { this.noteApplied.set(true); this.actionResult.set(null); this.noteAdded.emit(); },
       error: () => { this.aiError.set('Failed to apply note'); }
     });
   }
