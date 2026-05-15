@@ -47,6 +47,13 @@ import { ChatMessage } from '../../core/models/chat.model';
               <strong>{{ msg.role }}</strong><br>
               {{ msg.error ? 'Error: ' + msg.errorMessage : msg.content }}
             </span>
+            <div *ngIf="msg.role === 'ASSISTANT' && !msg.error" style="margin-top:0.25rem">
+              <button mat-button color="primary"
+                      [disabled]="appliedMessages().has(msg.id)"
+                      (click)="applyMessageAsNote(msg)">
+                {{ appliedMessages().has(msg.id) ? 'Applied' : 'Apply as Note' }}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -73,6 +80,7 @@ export class AiChatPanelComponent implements OnInit {
   aiError = signal<string | null>(null);
   actionResult = signal<string | null>(null);
   noteApplied = signal(false);
+  appliedMessages = signal<Set<string>>(new Set());
 
   constructor(private aiService: AiService) {}
 
@@ -119,8 +127,19 @@ export class AiChatPanelComponent implements OnInit {
   applyAsNote(): void {
     const result = this.actionResult();
     if (!result) return;
-    this.aiService.applySummaryAsNote(this.ticketId, result).subscribe({
-      next: () => { this.noteApplied.set(true); this.actionResult.set(null); this.noteAdded.emit(); },
+    this.doApplyNote(result, () => { this.noteApplied.set(true); this.actionResult.set(null); });
+  }
+
+  applyMessageAsNote(msg: ChatMessage): void {
+    if (!msg.content || this.appliedMessages().has(msg.id)) return;
+    this.doApplyNote(msg.content, () => {
+      this.appliedMessages.update(s => new Set([...s, msg.id]));
+    });
+  }
+
+  private doApplyNote(content: string, onSuccess: () => void): void {
+    this.aiService.applySummaryAsNote(this.ticketId, content).subscribe({
+      next: () => { onSuccess(); this.noteAdded.emit(); },
       error: () => { this.aiError.set('Failed to apply note'); }
     });
   }
