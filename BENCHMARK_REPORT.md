@@ -194,6 +194,59 @@ Stesso pattern già applicato in precedenza a `TicketService.list()` e `TicketSe
 
 ---
 
+### Angular 21 zoneless change detection — componenti non si aggiornano dopo HTTP
+
+**Scoperto:** dopo il fix del LazyInitializationException, la dashboard caricava correttamente lato backend ma la UI rimaneva bianca con lo spinner perpetuo. Stesso comportamento su ticket list, ticket detail, login.
+
+**Analisi:** Angular 21 usa change detection zoneless per default. Le proprietà di classe normali (`loading = true`, `error = null`) non sono reattive: modificarle non scatena il re-render del template. Il problema era mascherato in sviluppo locale (dove zone.js era presente via `angular.json` polyfills) ma manifesto nel build Docker di produzione.
+
+**Root cause:** tutti i componenti usavano proprietà di classe semplici invece di Angular Signals. Con la detection zoneless, solo i Signals (`.set()`, `.update()`) scatenano il re-render.
+
+**Fix applicato** (commit `448c5c3`): migrazione di tutti e 7 i componenti con stato (`DashboardComponent`, `LoginComponent`, `TicketListComponent`, `TicketDetailComponent`, `CreateTicketComponent`, `UserListComponent`, `AiChatPanelComponent`) a `signal<T>()`. Tutte le mutazioni di stato convertite in `.set()` / `.update()`; i template aggiornati a usare la sintassi `signal()`.
+
+**Verifica post-fix:** test E2E headless con Playwright confermano rendering corretto di dashboard, ticket list e ticket detail dopo login admin.
+
+---
+
+### Ticket assignment UI — mancante
+
+**Scoperto:** la pagina ticket detail non aveva alcun controllo per assegnare o autoassegnare un ticket.
+
+**Fix implementato** (commits `73995192`, `48c4347d`, `49c6366e`): aggiunta UI di assegnazione inline nel `TicketDetailComponent`:
+
+- Operator: bottone "Assign to me" / "Unassign" (visibile solo per se stessi)
+- Admin: dropdown `mat-select` con lista utenti + bottone "Assign"
+- `UserService.listUsers()` caricato all'init solo per admin
+- `TicketService.assign()` riusato senza modifiche backend
+
+Correzioni post-review (code quality): rimosso parametro inutilizzato `t: Ticket` da `loadUsers()`; errore di caricamento utenti ora visibile in UI invece di essere silente.
+
+**Verifica post-fix:** test Playwright — flusso operator (unassign → assign to me → unassign) e flusso admin (dropdown unassign → assign) entrambi confermati.
+
+---
+
+### Nota AI non visibile immediatamente dopo "Apply as Note"
+
+**Scoperto:** applicando una nota dall'AI assistant (Summary o Suggested Reply), la nota non compariva nel tab Notes del ticket. Bisognava tornare in dashboard e rientrare nel ticket per vederla.
+
+**Root cause:** `AiChatPanelComponent` è un componente figlio di `TicketDetailComponent`. Al successo di `applySummaryAsNote()`, il figlio aggiornava solo il proprio stato interno (`noteApplied = true`) senza notificare il parent di ricaricare il proprio signal `notes`.
+
+**Fix applicato** (commit `1d1628d`): aggiunto `@Output() noteAdded = new EventEmitter<void>()` su `AiChatPanelComponent`; il parent `TicketDetailComponent` ascolta `(noteAdded)="loadNotes(ticket()!.id)"` e ricarica la lista note immediatamente.
+
+**Verifica post-fix:** test Playwright — nota conta 4 prima dell'apply, 5 immediatamente dopo senza alcun reload di pagina.
+
+---
+
+### "Apply as Note" disponibile solo per Summary e Suggested Reply
+
+**Scoperto:** solo i risultati delle azioni Summary e Suggested Reply avevano il bottone "Apply as Note". I messaggi dell'AI nella chat conversazionale non erano applicabili come note.
+
+**Fix implementato** (commit `382691d`): aggiunto bottone "Apply as Note" su ogni messaggio di ruolo `ASSISTANT` nella chat. Il bottone diventa "Applied" (disabilitato) dopo il click per evitare duplicati. Logica comune estratta in `doApplyNote(content, onSuccess)`.
+
+**Verifica post-fix:** test Playwright — 3 bottoni "Apply as Note" visibili su messaggi AI esistenti; dopo il click il bottone mostra "Applied" e la nota appare immediatamente nel tab Notes.
+
+---
+
 ## 7. Known Limitations
 
 1. **Bundle size:** Angular initial bundle è ~836 kB, oltre il budget default di 500 kB. Risolvibile con lazy-loaded routes o alzando il budget in `angular.json`.
