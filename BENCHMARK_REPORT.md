@@ -155,19 +155,58 @@ The build **succeeded** with a non-fatal budget warning. The app is fully functi
 
 ---
 
-## 6. Known Limitations
+## 6. Bug Found and Fixed Post-Delivery
 
-1. **Bundle size:** Angular initial bundle is ~836 kB, exceeding the default 500 kB budget. Can be fixed by enabling lazy-loaded routes or raising the budget in `angular.json`.
-2. **No self-registration:** Only the two seeded users can log in.
-3. **No real-time updates:** The UI must be refreshed manually to see new data from other users.
-4. **Testcontainers integration tests:** `TicketControllerIT` and `AuthSecurityIT` require a Docker daemon at test time. They are excluded from the default `mvn test` run to avoid CI issues; run with `-Pintegration` or ensure Docker is available.
-5. **OpenRouter dependency:** When `AI_PROVIDER=openrouter`, the backend makes outbound HTTPS calls. Free-tier rate limits apply.
-6. **No pagination in frontend ticket list:** The backend supports pagination; the frontend currently fetches the first page (size 20). Pagination controls are not rendered.
-7. **No WebSocket/SSE:** AI responses are returned synchronously. Long-running model calls may time out on slow OpenRouter models.
+### LazyInitializationException in Docker deployment — dashboard pagina bianca
+
+**Scoperto:** dopo il login come admin nel deployment Docker completo (`make stack-up`), la pagina risultava bianca con errore 500 nel backend.
+
+**Analisi dei log:**
+
+```
+ERROR i.o.d.exception.GlobalExceptionHandler : Unhandled exception
+org.hibernate.LazyInitializationException: could not initialize proxy
+  [io.opspilot.desk.entity.User#...] - no Session
+    at io.opspilot.desk.service.TicketService.toResponse(TicketService.java:127)
+    at io.opspilot.desk.service.DashboardService.getDashboard(DashboardService.java:32)
+    at io.opspilot.desk.controller.DashboardController.getDashboard(...)
+```
+
+**Root cause:** `DashboardService.getDashboard()` e `NoteService.listNotes()` chiamavano `ticketService.toResponse()` — che accede alle lazy association `createdBy.getEmail()` e `assignedTo.getEmail()` — senza una transazione Hibernate attiva. Hibernate non può inizializzare i proxy fuori sessione.
+
+In locale il bug era silente perché il processo Maven mantiene configurazioni leggermente diverse; in Docker con il JAR compilato il comportamento è più stretto e l'errore si manifesta al primo caricamento della dashboard.
+
+**Fix applicato** (commit `1a3cbd9`):
+
+```java
+// DashboardService.java
+@Transactional(readOnly = true)
+public DashboardResponse getDashboard(String userEmail) { ... }
+
+// NoteService.java
+@Transactional(readOnly = true)
+public List<NoteResponse> listNotes(UUID ticketId) { ... }
+```
+
+Stesso pattern già applicato in precedenza a `TicketService.list()` e `TicketService.getById()` durante lo sviluppo iniziale.
+
+**Verifica post-fix:** backend rebuildato e riavviato; login admin + caricamento dashboard funzionano correttamente, log puliti senza eccezioni.
 
 ---
 
-## 7. Suggested Next Improvements
+## 7. Known Limitations
+
+1. **Bundle size:** Angular initial bundle è ~836 kB, oltre il budget default di 500 kB. Risolvibile con lazy-loaded routes o alzando il budget in `angular.json`.
+2. **No self-registration:** Solo i due utenti seedati possono accedere.
+3. **No real-time updates:** La UI deve essere ricaricata manualmente per vedere nuovi dati.
+4. **Testcontainers integration tests:** `TicketControllerIT` e `AuthSecurityIT` richiedono un Docker daemon a runtime. Funzionano in locale con Docker disponibile.
+5. **OpenRouter dependency:** Con `AI_PROVIDER=openrouter` il backend effettua chiamate HTTPS esterne. Si applicano rate limit del piano free.
+6. **No pagination in frontend ticket list:** Il backend supporta la paginazione; il frontend carica la prima pagina (size 20). I controlli di paginazione non sono renderizzati.
+7. **No WebSocket/SSE:** Le risposte AI sono sincrone. Chiamate lente a OpenRouter possono andare in timeout.
+
+---
+
+## 8. Suggested Next Improvements
 
 1. **Lazy-load Angular routes** to reduce initial bundle size below 500 kB.
 2. **Add frontend pagination controls** to the ticket list.
