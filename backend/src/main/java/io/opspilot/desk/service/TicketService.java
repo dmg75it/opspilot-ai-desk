@@ -53,10 +53,12 @@ public class TicketService {
         return toResponse(saved);
     }
 
+    @Transactional(readOnly = true)
     public Page<TicketResponse> list(Pageable pageable) {
         return ticketRepository.findAll(pageable).map(this::toResponse);
     }
 
+    @Transactional(readOnly = true)
     public TicketResponse getById(UUID id) {
         return toResponse(findTicket(id));
     }
