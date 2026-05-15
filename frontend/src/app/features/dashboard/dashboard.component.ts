@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NgIf, NgFor } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -16,10 +16,10 @@ import { ErrorBannerComponent } from '../../shared/components/error-banner/error
     MatButtonModule, LoadingSpinnerComponent, ErrorBannerComponent],
   template: `
     <h1>Dashboard</h1>
-    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
-    <app-error-banner [message]="error"></app-error-banner>
+    <app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+    <app-error-banner [message]="error()"></app-error-banner>
 
-    <div *ngIf="data" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem">
+    <div *ngIf="data()" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem">
       <mat-card *ngFor="let entry of statusEntries()">
         <mat-card-content>
           <div style="font-size:2rem;font-weight:bold">{{ entry[1] }}</div>
@@ -28,13 +28,13 @@ import { ErrorBannerComponent } from '../../shared/components/error-banner/error
       </mat-card>
       <mat-card>
         <mat-card-content>
-          <div style="font-size:2rem;font-weight:bold">{{ data.aiInteractionsToday }}</div>
+          <div style="font-size:2rem;font-weight:bold">{{ data()!.aiInteractionsToday }}</div>
           <div>AI interactions today</div>
         </mat-card-content>
       </mat-card>
     </div>
 
-    <div *ngIf="data" style="margin-bottom:1rem">
+    <div *ngIf="data()" style="margin-bottom:1rem">
       <h3>By Priority</h3>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem">
         <mat-card *ngFor="let entry of priorityEntries()">
@@ -46,12 +46,12 @@ import { ErrorBannerComponent } from '../../shared/components/error-banner/error
       </div>
     </div>
 
-    <div *ngIf="data" style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+    <div *ngIf="data()" style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
       <mat-card>
         <mat-card-header><mat-card-title>My Open Tickets</mat-card-title></mat-card-header>
         <mat-card-content>
-          <div *ngIf="data.myOpenTickets.length === 0" style="color:grey">No assigned tickets</div>
-          <table mat-table [dataSource]="data.myOpenTickets" *ngIf="data.myOpenTickets.length > 0" style="width:100%">
+          <div *ngIf="data()!.myOpenTickets.length === 0" style="color:grey">No assigned tickets</div>
+          <table mat-table [dataSource]="data()!.myOpenTickets" *ngIf="data()!.myOpenTickets.length > 0" style="width:100%">
             <ng-container matColumnDef="title">
               <th mat-header-cell *matHeaderCellDef>Title</th>
               <td mat-cell *matCellDef="let t">
@@ -71,7 +71,7 @@ import { ErrorBannerComponent } from '../../shared/components/error-banner/error
       <mat-card>
         <mat-card-header><mat-card-title>Recently Updated</mat-card-title></mat-card-header>
         <mat-card-content>
-          <table mat-table [dataSource]="data.recentlyUpdated" style="width:100%">
+          <table mat-table [dataSource]="data()!.recentlyUpdated" style="width:100%">
             <ng-container matColumnDef="title">
               <th mat-header-cell *matHeaderCellDef>Title</th>
               <td mat-cell *matCellDef="let t">
@@ -91,24 +91,24 @@ import { ErrorBannerComponent } from '../../shared/components/error-banner/error
   `
 })
 export class DashboardComponent implements OnInit {
-  loading = true;
-  error: string | null = null;
-  data: DashboardData | null = null;
+  loading = signal(true);
+  error = signal<string | null>(null);
+  data = signal<DashboardData | null>(null);
 
   constructor(private dashboardService: DashboardService) {}
 
   ngOnInit(): void {
     this.dashboardService.getDashboard().subscribe({
-      next: d => { this.data = d; this.loading = false; },
-      error: () => { this.error = 'Failed to load dashboard'; this.loading = false; }
+      next: d => { this.data.set(d); this.loading.set(false); },
+      error: () => { this.error.set('Failed to load dashboard'); this.loading.set(false); }
     });
   }
 
   statusEntries(): [string, number][] {
-    return Object.entries(this.data?.ticketsByStatus ?? {});
+    return Object.entries(this.data()?.ticketsByStatus ?? {});
   }
 
   priorityEntries(): [string, number][] {
-    return Object.entries(this.data?.ticketsByPriority ?? {});
+    return Object.entries(this.data()?.ticketsByPriority ?? {});
   }
 }

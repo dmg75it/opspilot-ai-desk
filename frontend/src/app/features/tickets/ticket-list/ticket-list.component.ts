@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NgIf, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -20,10 +20,10 @@ import { ErrorBannerComponent } from '../../../shared/components/error-banner/er
       <h1>Tickets</h1>
       <a mat-raised-button color="primary" routerLink="/tickets/new">New Ticket</a>
     </div>
-    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
-    <app-error-banner [message]="error"></app-error-banner>
+    <app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+    <app-error-banner [message]="error()"></app-error-banner>
 
-    <table mat-table [dataSource]="tickets" *ngIf="!loading" style="width:100%">
+    <table mat-table [dataSource]="tickets()" *ngIf="!loading()" style="width:100%">
       <ng-container matColumnDef="title">
         <th mat-header-cell *matHeaderCellDef>Title</th>
         <td mat-cell *matCellDef="let t">
@@ -57,7 +57,7 @@ import { ErrorBannerComponent } from '../../../shared/components/error-banner/er
     </table>
 
     <mat-paginator
-      [length]="totalElements"
+      [length]="totalElements()"
       [pageSize]="pageSize"
       [pageSizeOptions]="[10, 20, 50]"
       (page)="onPage($event)">
@@ -72,10 +72,10 @@ import { ErrorBannerComponent } from '../../../shared/components/error-banner/er
   `]
 })
 export class TicketListComponent implements OnInit {
-  tickets: Ticket[] = [];
-  loading = true;
-  error: string | null = null;
-  totalElements = 0;
+  tickets = signal<Ticket[]>([]);
+  loading = signal(true);
+  error = signal<string | null>(null);
+  totalElements = signal(0);
   pageSize = 20;
   currentPage = 0;
   columns = ['title', 'status', 'priority', 'category', 'createdByEmail', 'updatedAt'];
@@ -85,14 +85,14 @@ export class TicketListComponent implements OnInit {
   ngOnInit(): void { this.load(); }
 
   load(): void {
-    this.loading = true;
+    this.loading.set(true);
     this.ticketService.list(this.currentPage, this.pageSize).subscribe({
       next: (page: Page<Ticket>) => {
-        this.tickets = page.content;
-        this.totalElements = page.totalElements;
-        this.loading = false;
+        this.tickets.set(page.content);
+        this.totalElements.set(page.totalElements);
+        this.loading.set(false);
       },
-      error: () => { this.error = 'Failed to load tickets'; this.loading = false; }
+      error: () => { this.error.set('Failed to load tickets'); this.loading.set(false); }
     });
   }
 

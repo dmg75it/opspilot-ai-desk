@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,7 +17,7 @@ import { ErrorBannerComponent } from '../../../shared/components/error-banner/er
     MatInputModule, MatSelectModule, MatButtonModule, ErrorBannerComponent],
   template: `
     <h1>Create Ticket</h1>
-    <app-error-banner [message]="error"></app-error-banner>
+    <app-error-banner [message]="error()"></app-error-banner>
     <mat-card style="max-width:700px">
       <mat-card-content>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" style="display:flex;flex-direction:column;gap:1rem;padding:1rem">
@@ -56,7 +56,7 @@ import { ErrorBannerComponent } from '../../../shared/components/error-banner/er
             <input matInput formControlName="externalRef">
           </mat-form-field>
           <div style="display:flex;gap:1rem">
-            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading">Create</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading()">Create</button>
             <button mat-button type="button" (click)="router.navigate(['/tickets'])">Cancel</button>
           </div>
         </form>
@@ -66,8 +66,8 @@ import { ErrorBannerComponent } from '../../../shared/components/error-banner/er
 })
 export class CreateTicketComponent {
   form: FormGroup;
-  loading = false;
-  error: string | null = null;
+  loading = signal(false);
+  error = signal<string | null>(null);
 
   constructor(private fb: FormBuilder, private ticketService: TicketService, public router: Router) {
     this.form = this.fb.group({
@@ -81,10 +81,10 @@ export class CreateTicketComponent {
 
   onSubmit(): void {
     if (this.form.invalid) return;
-    this.loading = true;
+    this.loading.set(true);
     this.ticketService.create(this.form.value).subscribe({
       next: t => this.router.navigate(['/tickets', t.id]),
-      error: () => { this.error = 'Failed to create ticket'; this.loading = false; }
+      error: () => { this.error.set('Failed to create ticket'); this.loading.set(false); }
     });
   }
 }

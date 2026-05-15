@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -33,10 +33,10 @@ import { AuthService } from '../../core/auth/auth.service';
               <input matInput type="password" formControlName="password" autocomplete="current-password">
               <mat-error *ngIf="form.get('password')?.hasError('required')">Password is required</mat-error>
             </mat-form-field>
-            <div *ngIf="error" style="color:red;font-size:0.875rem">{{ error }}</div>
-            <button mat-raised-button color="primary" type="submit" [disabled]="loading || form.invalid">
-              <mat-spinner *ngIf="loading" diameter="20" style="display:inline-block"></mat-spinner>
-              <span *ngIf="!loading">Sign In</span>
+            <div *ngIf="error()" style="color:red;font-size:0.875rem">{{ error() }}</div>
+            <button mat-raised-button color="primary" type="submit" [disabled]="loading() || form.invalid">
+              <mat-spinner *ngIf="loading()" diameter="20" style="display:inline-block"></mat-spinner>
+              <span *ngIf="!loading()">Sign In</span>
             </button>
           </form>
         </mat-card-content>
@@ -46,8 +46,8 @@ import { AuthService } from '../../core/auth/auth.service';
 })
 export class LoginComponent {
   form: FormGroup;
-  loading = false;
-  error: string | null = null;
+  loading = signal(false);
+  error = signal<string | null>(null);
 
   constructor(private fb: FormBuilder, private auth: AuthService, private router: Router) {
     this.form = this.fb.group({
@@ -59,14 +59,11 @@ export class LoginComponent {
 
   onSubmit(): void {
     if (this.form.invalid) return;
-    this.loading = true;
-    this.error = null;
+    this.loading.set(true);
+    this.error.set(null);
     this.auth.login(this.form.value).subscribe({
-      next: () => { this.loading = false; this.router.navigate(['/dashboard']); },
-      error: () => {
-        this.error = 'Invalid email or password';
-        this.loading = false;
-      }
+      next: () => { this.loading.set(false); this.router.navigate(['/dashboard']); },
+      error: () => { this.error.set('Invalid email or password'); this.loading.set(false); }
     });
   }
 }

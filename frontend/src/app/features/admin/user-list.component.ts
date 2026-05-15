@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatCardModule } from '@angular/material/card';
@@ -13,11 +13,11 @@ import { ErrorBannerComponent } from '../../shared/components/error-banner/error
   imports: [NgIf, MatTableModule, MatCardModule, LoadingSpinnerComponent, ErrorBannerComponent],
   template: `
     <h1>Users</h1>
-    <app-error-banner [message]="error"></app-error-banner>
-    <app-loading-spinner *ngIf="loading"></app-loading-spinner>
-    <mat-card *ngIf="!loading">
+    <app-error-banner [message]="error()"></app-error-banner>
+    <app-loading-spinner *ngIf="loading()"></app-loading-spinner>
+    <mat-card *ngIf="!loading()">
       <mat-card-content>
-        <table mat-table [dataSource]="users" style="width:100%">
+        <table mat-table [dataSource]="users()" style="width:100%">
           <ng-container matColumnDef="email">
             <th mat-header-cell *matHeaderCellDef>Email</th>
             <td mat-cell *matCellDef="let u">{{ u.email }}</td>
@@ -38,16 +38,16 @@ import { ErrorBannerComponent } from '../../shared/components/error-banner/error
   `
 })
 export class UserListComponent implements OnInit {
-  users: User[] = [];
-  loading = true;
-  error: string | null = null;
+  users = signal<User[]>([]);
+  loading = signal(true);
+  error = signal<string | null>(null);
 
   constructor(private userService: UserService) {}
 
   ngOnInit(): void {
     this.userService.listUsers().subscribe({
-      next: u => { this.users = u; this.loading = false; },
-      error: () => { this.loading = false; this.error = 'Failed to load users'; }
+      next: u => { this.users.set(u); this.loading.set(false); },
+      error: () => { this.loading.set(false); this.error.set('Failed to load users'); }
     });
   }
 }
