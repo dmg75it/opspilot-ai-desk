@@ -34,6 +34,18 @@ import { ErrorBannerComponent } from '../../shared/components/error-banner/error
       </mat-card>
     </div>
 
+    <div *ngIf="data" style="margin-bottom:1rem">
+      <h3>By Priority</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem">
+        <mat-card *ngFor="let entry of priorityEntries()">
+          <mat-card-content>
+            <div style="font-size:2rem;font-weight:bold">{{ entry[1] }}</div>
+            <div>{{ entry[0] }}</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
     <div *ngIf="data" style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
       <mat-card>
         <mat-card-header><mat-card-title>My Open Tickets</mat-card-title></mat-card-header>
@@ -94,5 +106,9 @@ export class DashboardComponent implements OnInit {
 
   statusEntries(): [string, number][] {
     return Object.entries(this.data?.ticketsByStatus ?? {});
+  }
+
+  priorityEntries(): [string, number][] {
+    return Object.entries(this.data?.ticketsByPriority ?? {});
   }
 }
