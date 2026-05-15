@@ -5,13 +5,15 @@ import { MatCardModule } from '@angular/material/card';
 import { UserService } from '../../core/services/user.service';
 import { User } from '../../core/models/user.model';
 import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner/loading-spinner.component';
+import { ErrorBannerComponent } from '../../shared/components/error-banner/error-banner.component';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [NgIf, MatTableModule, MatCardModule, LoadingSpinnerComponent],
+  imports: [NgIf, MatTableModule, MatCardModule, LoadingSpinnerComponent, ErrorBannerComponent],
   template: `
     <h1>Users</h1>
+    <app-error-banner [message]="error"></app-error-banner>
     <app-loading-spinner *ngIf="loading"></app-loading-spinner>
     <mat-card *ngIf="!loading">
       <mat-card-content>
@@ -38,13 +40,14 @@ import { LoadingSpinnerComponent } from '../../shared/components/loading-spinner
 export class UserListComponent implements OnInit {
   users: User[] = [];
   loading = true;
+  error: string | null = null;
 
   constructor(private userService: UserService) {}
 
   ngOnInit(): void {
     this.userService.listUsers().subscribe({
       next: u => { this.users = u; this.loading = false; },
-      error: () => this.loading = false
+      error: () => { this.loading = false; this.error = 'Failed to load users'; }
     });
   }
 }
