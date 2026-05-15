@@ -47,6 +47,7 @@ public class NoteService {
         return toResponse(noteRepository.save(note));
     }
 
+    @Transactional(readOnly = true)
     public List<NoteResponse> listNotes(UUID ticketId) {
         var ticket = ticketRepository.findById(ticketId)
             .orElseThrow(() -> new RuntimeException("Ticket not found"));

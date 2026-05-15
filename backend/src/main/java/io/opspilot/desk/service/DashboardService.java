@@ -5,6 +5,7 @@ import io.opspilot.desk.entity.Ticket;
 import io.opspilot.desk.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ public class DashboardService {
     private final AiService aiService;
     private final TicketService ticketService;
 
+    @Transactional(readOnly = true)
     public DashboardResponse getDashboard(String userEmail) {
         var byStatus = Arrays.stream(Ticket.Status.values())
             .collect(Collectors.toMap(Enum::name, ticketRepository::countByStatus));
