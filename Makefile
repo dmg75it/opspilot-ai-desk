@@ -10,10 +10,10 @@ db-down:
 	docker compose down
 
 backend-run:
-	mvn -f backend/pom.xml spring-boot:run
+	JAVA_HOME=$(JAVA_HOME) mvn -f backend/pom.xml spring-boot:run
 
 backend-test:
-	mvn -f backend/pom.xml test
+	JAVA_HOME=$(JAVA_HOME) mvn -f backend/pom.xml test
 
 frontend-install:
 	cd frontend && npm install
