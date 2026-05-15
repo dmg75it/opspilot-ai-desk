@@ -21,7 +21,7 @@ public class ChatMessage {
     private ChatSession session;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "message_role", nullable = false)
+    @Column(nullable = false, length = 50)
     private Role role;
 
     @Column(nullable = false, columnDefinition = "TEXT")

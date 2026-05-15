@@ -28,7 +28,7 @@ public class TicketNote {
     private String body;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "note_visibility", nullable = false)
+    @Column(nullable = false, length = 50)
     private Visibility visibility = Visibility.INTERNAL;
 
     @Column(name = "created_at", nullable = false, updatable = false)

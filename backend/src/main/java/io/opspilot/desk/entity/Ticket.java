@@ -28,15 +28,15 @@ public class Ticket {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ticket_status", nullable = false)
+    @Column(nullable = false, length = 50)
     private Status status = Status.NEW;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ticket_priority", nullable = false)
+    @Column(nullable = false, length = 50)
     private Priority priority;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ticket_category", nullable = false)
+    @Column(nullable = false, length = 50)
     private Category category;
 
     @ManyToOne(fetch = FetchType.LAZY)
