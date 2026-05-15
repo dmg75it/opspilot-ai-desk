@@ -16,3 +16,7 @@ frontend/.angular/
 
 # OS
 .DS_Store
+
+# Build artifacts in root (from Maven plugin)
+META-INF/
+org/
