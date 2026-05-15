@@ -271,3 +271,103 @@ Correzioni post-review (code quality): rimosso parametro inutilizzato `t: Ticket
 8. **Rate limiting** on AI endpoints to prevent abuse.
 9. **Audit log UI:** Expose the `SYSTEM` notes (audit trail) in a dedicated timeline view on ticket detail.
 10. **OpenRouter streaming:** Use SSE to stream AI tokens to the frontend for better UX.
+
+
+
+2026-05-15 12:31  superpowers standard
+Session
+
+  Total cost:            $0.0000
+  Total duration (API):  0s
+  Total duration (wall): 3m 20s
+  Total code changes:    0 lines added, 0 lines removed
+  Usage:                 0 input, 0 output, 0 cache read, 0 cache write
+
+  Current session
+  ██████████████████▌                                37% used
+  Resets 3:30pm (Europe/Rome)
+
+  Current week (all models)
+  ██████                                             12% used
+  Resets May 15, 1pm (Europe/Rome)
+
+
+2026-05-15 13:24  end planning
+Session
+
+  Total cost:            $4.13
+  Total duration (API):  35m 54s
+  Total duration (wall): 56m 37s
+  Total code changes:    4959 lines added, 7 lines removed
+  Usage by model:
+      claude-haiku-4-5:  465 input, 19 output, 0 cache read, 0 cache write ($0.0006)
+     claude-sonnet-4-6:  4.4k input, 180.7k output, 3.2m cache read, 114.6k cache write ($4.13)
+
+  Current session
+  █████████████████████████████████████████          82% used
+  Resets 3:30pm (Europe/Rome)
+
+  Current week (all models)
+  █▌                                                 3% used
+  Resets May 22, 1pm (Europe/Rome)
+
+
+2026-05-15 13:32 switch Claude account, start building
+Session
+
+  Total cost:            $0.0000
+  Total duration (API):  0s
+  Total duration (wall): 2m 31s
+  Total code changes:    0 lines added, 0 lines removed
+  Usage:                 0 input, 0 output, 0 cache read, 0 cache write
+
+  Current session
+                                                     0% used
+  Resets 6:30pm (Europe/Rome)
+
+  Current week (all models)
+  ████████                                           16% used
+  Resets May 16, 8am (Europe/Rome)
+
+
+2026-05-15 15:05 end building
+Session
+
+  Total cost:            $13.14
+  Total duration (API):  1h 0m 10s
+  Total duration (wall): 1h 35m 4s
+  Total code changes:    3897 lines added, 78 lines removed
+  Usage by model:
+      claude-haiku-4-5:  659 input, 14.0k output, 1.1m cache read, 105.8k cache write ($0.3118)
+     claude-sonnet-4-6:  3.4k input, 211.1k output, 23.0m cache read, 729.9k cache write ($12.82)
+
+  Current session
+  █████████████████████████████████████████████▌     91% used
+  Resets 6:30pm (Europe/Rome)
+
+  Current week (all models)
+  ███████████                                        22% used
+  Resets May 16, 8am (Europe/Rome)
+
+
+2026-05-15 15:10 troubleshouting
+2026-05-15 15:27 ritorno su account frontiere, usage resettato
+
+2026-05-15 17:00 fine
+Session
+
+  Total cost:            $9.32
+  Total duration (API):  42m 12s
+  Total duration (wall): 1h 29m 24s
+  Total code changes:    1533 lines added, 219 lines removed
+  Usage by model:
+      claude-haiku-4-5:  477 input, 18 output, 0 cache read, 0 cache write ($0.0006)
+     claude-sonnet-4-6:  4.5k input, 128.4k output, 19.7m cache read, 393.4k cache write ($9.31)
+
+  Current session
+  █████████████████████▌                             43% used
+  Resets 8:30pm (Europe/Rome)
+
+  Current week (all models)
+  ███                                                6% used
+  Resets May 22, 1pm (Europe/Rome)
