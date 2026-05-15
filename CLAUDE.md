@@ -393,5 +393,13 @@ The project is complete when:
 7. AI chat works through OpenRouter when configured.
 8. Fake AI mode works without external API calls.
 9. Tests run successfully or failures are documented with reasons.
-10. README explains setup, architecture, and limitations.
+10. README explains setup, architecture,  limitations, and verification commands.
 
+At the end, produce a final report in BENCHMARK_REPORT.md containing:
+1. What was implemented.
+2. What was not implemented.
+3. Assumptions made.
+4. Commands executed.
+5. Test/build results.
+6. Known limitations.
+7. Suggested next improvements.
