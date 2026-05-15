@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, inject, input, OnInit, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -119,6 +119,7 @@ import { ChatMessage } from '../../../core/models/chat.model';
 })
 export class ChatPanelComponent implements OnInit {
   ticketId = input.required<string>();
+  noteAdded = output<void>();
   private chatService = inject(ChatService);
 
   messages = signal<ChatMessage[]>([]);
@@ -169,6 +170,7 @@ export class ChatPanelComponent implements OnInit {
     this.chatService.applyAsNote(this.ticketId(), msg.id).subscribe({
       next: () => {
         this.noteApplied.set(true);
+        this.noteAdded.emit();
         setTimeout(() => this.noteApplied.set(false), 3000);
       }
     });

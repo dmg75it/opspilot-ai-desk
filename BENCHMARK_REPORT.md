@@ -186,6 +186,56 @@ Tests cover: `AuthService` (login, logout, isAdmin, token storage) and `LoginCom
 
 ---
 
+## 8. Post-benchmark bug fixes
+
+Bug rilevati durante il collaudo reale dell'applicazione dopo il commit iniziale.
+
+### Bug 1 — Docker volume stale: password authentication failed
+
+**Sintomo**: Il backend non si avviava, log `FATAL: password authentication failed for user "opspilot"`.
+**Causa**: Il volume Docker `opspilot-ai-desk_postgres_data` era stato creato in una sessione precedente con credenziali diverse. Al riavvio dello stack, PostgreSQL rifiutava le credenziali configurate in `docker-compose.yml`.
+**Fix**: `docker compose down && docker volume rm opspilot-ai-desk_postgres_data`, poi riavvio completo. Il volume viene ricreato con le credenziali corrette.
+**File**: nessuna modifica al codice; problema operativo di stato del volume Docker.
+
+---
+
+### Bug 2 — Material Icons non caricate: artefatti di testo nella sidebar
+
+**Sintomo**: Le voci di menu mostravano le prime due lettere del nome dell'icona ("da", "co", "ad") invece del simbolo grafico.
+**Causa**: `frontend/src/index.html` non includeva il link al font Google Material Icons. Senza il font, `<mat-icon>` renderizza il testo della ligatura (es. "dashboard") che viene troncato dal contenitore a dimensione fissa.
+**Fix**: Aggiunti i tag `<link>` per Material Icons e Roboto in `index.html`:
+```html
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+```
+**File**: `frontend/src/index.html`
+
+---
+
+### Bug 3 — Nessuna UI per assegnare un ticket
+
+**Sintomo**: Non era possibile assegnare o auto-assegnarsi un ticket dall'interfaccia.
+**Causa**: Il backend esponeva già `PATCH /api/tickets/:id/assign` e il `TicketService` Angular aveva già il metodo `assign()`, ma la card di assegnazione mancava completamente dal template del ticket detail.
+**Fix**: Aggiunta card "Assign Ticket" nel tab Details di `TicketDetailComponent` con:
+- Pulsante **Assign to me** per tutti gli utenti autenticati (quando il ticket non è già assegnato all'utente corrente)
+- Pulsante **Unassign** quando il ticket è assegnato
+- Dropdown con tutti gli utenti + pulsante **Assign** visibile solo agli ADMIN (da `/api/admin/users`)
+
+**File**: `frontend/src/app/features/tickets/ticket-detail/ticket-detail.component.ts`
+
+---
+
+### Bug 4 — Tab Notes non si aggiorna dopo "Apply as note" dalla chat AI
+
+**Sintomo**: Dopo aver applicato un messaggio AI come nota tramite il pulsante nella chat, il tab Notes non mostrava la nuova nota. Era necessario tornare alla dashboard e riaprire il ticket.
+**Causa**: `ChatPanelComponent.applyAsNote()` chiamava il backend correttamente, ma non notificava il componente parent. `TicketDetailComponent` caricava le note solo in `ngOnInit`, senza alcun meccanismo di aggiornamento esterno.
+**Fix**: Aggiunto `noteAdded = output<void>()` in `ChatPanelComponent`; l'output viene emesso al successo di `applyAsNote()`. Nel parent, il binding `(noteAdded)="loadNotes()"` ricarica le note immediatamente.
+**File**:
+- `frontend/src/app/features/chat/chat-panel/chat-panel.component.ts`
+- `frontend/src/app/features/tickets/ticket-detail/ticket-detail.component.ts`
+
+---
+
 ## 6. Known limitations
 
 1. **Java version mismatch**: Spec targets Java 21; local JDK is Java 25. Docker image uses `eclipse-temurin:21` — the Dockerfile will compile with Java 21 inside Docker, but local `mvn` runs on Java 25. This is fine for development but should be unified in CI.
@@ -210,3 +260,61 @@ Tests cover: `AuthService` (login, logout, isAdmin, token storage) and `LoginCom
 8. **Extract prompt templates to configuration** (YAML or DB) to allow non-code updates.
 9. **Add rate limiting** on AI endpoints to prevent runaway token usage.
 10. **Implement refresh tokens** to avoid forcing re-login after JWT expiry.
+
+
+2026-05-15 10:55  feature-dev standard
+Session
+
+  Total cost:            $0.0000
+  Total duration (API):  0s
+  Total duration (wall): 13m 12s
+  Total code changes:    0 lines added, 0 lines removed
+  Usage:                 0 input, 0 output, 0 cache read, 0 cache write
+
+  Current session
+                                                     0% used
+  Resets 3:30pm (Europe/Rome)
+
+  Current week (all models)
+  ████▌                                              9% used
+  Resets May 15, 1pm (Europe/Rome)
+
+
+2026-05-15 11:40
+Session
+
+  Total cost:            $7.22
+  Total duration (API):  25m 11s
+  Total duration (wall): 1h 2m 2s
+  Total code changes:    4977 lines added, 98 lines removed
+  Usage by model:
+     claude-sonnet-4-6:  5.7k input, 110.3k output, 16.1m cache read, 193.6k cache write ($7.22)
+      claude-haiku-4-5:  370 input, 22 output, 0 cache read, 0 cache write ($0.0005)
+
+  Current session
+  ████████████████                                   32% used
+  Resets 3:30pm (Europe/Rome)
+
+  Current week (all models)
+  ██████                                             12% used
+  Resets May 15, 1pm (Europe/Rome)
+
+
+2026-05-15 12:13  troubleshouting
+Session
+
+  Total cost:            $8.39
+  Total duration (API):  29m 0s
+  Total duration (wall): 1h 33m 11s
+  Total code changes:    5100 lines added, 102 lines removed
+  Usage by model:
+     claude-sonnet-4-6:  6.8k input, 122.4k output, 18.6m cache read, 253.5k cache write ($8.39)
+      claude-haiku-4-5:  370 input, 22 output, 0 cache read, 0 cache write ($0.0005)
+
+  Current session
+  ██████████████████▌                                37% used
+  Resets 3:30pm (Europe/Rome)
+
+  Current week (all models)
+  ██████                                             12% used
+  Resets May 15, 1pm (Europe/Rome)

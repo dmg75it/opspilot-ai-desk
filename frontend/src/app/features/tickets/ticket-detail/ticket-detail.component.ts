@@ -14,7 +14,9 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { TicketService } from '../../../core/services/ticket.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { AdminService } from '../../../core/services/admin.service';
 import { Ticket, TicketNote, TicketStatus } from '../../../core/models/ticket.model';
+import { User } from '../../../core/models/user.model';
 import { StatusChipComponent } from '../status-chip.component';
 import { ChatPanelComponent } from '../../chat/chat-panel/chat-panel.component';
 
@@ -77,6 +79,37 @@ import { ChatPanelComponent } from '../../chat/chat-panel/chat-panel.component';
                       </button>
                     </mat-card-content>
                   </mat-card>
+
+                  <mat-card>
+                    <mat-card-header><mat-card-title>Assign Ticket</mat-card-title></mat-card-header>
+                    <mat-card-content>
+                      <div class="assign-actions">
+                        @if (ticket()!.assignedTo?.id !== auth.currentUser()?.id) {
+                          <button mat-raised-button color="primary" (click)="assignToMe()">
+                            <mat-icon>person</mat-icon> Assign to me
+                          </button>
+                        }
+                        @if (ticket()!.assignedTo) {
+                          <button mat-stroked-button (click)="unassign()">
+                            <mat-icon>person_off</mat-icon> Unassign
+                          </button>
+                        }
+                      </div>
+                      @if (auth.isAdmin() && users().length > 0) {
+                        <mat-form-field appearance="outline" class="full-width mt-8">
+                          <mat-label>Assign to operator</mat-label>
+                          <mat-select [(ngModel)]="selectedOperatorId">
+                            @for (u of users(); track u.id) {
+                              <mat-option [value]="u.id">{{ u.fullName }} ({{ u.email }})</mat-option>
+                            }
+                          </mat-select>
+                        </mat-form-field>
+                        <button mat-raised-button color="accent" (click)="assignTo()" [disabled]="!selectedOperatorId">
+                          Assign
+                        </button>
+                      }
+                    </mat-card-content>
+                  </mat-card>
                 }
               </div>
             </div>
@@ -123,7 +156,7 @@ import { ChatPanelComponent } from '../../chat/chat-panel/chat-panel.component';
 
         <mat-tab label="AI Chat">
           <div class="tab-content">
-            <app-chat-panel [ticketId]="ticketId" />
+            <app-chat-panel [ticketId]="ticketId" (noteAdded)="loadNotes()" />
           </div>
         </mat-tab>
       </mat-tab-group>
@@ -150,6 +183,8 @@ import { ChatPanelComponent } from '../../chat/chat-panel/chat-panel.component';
     .add-note-card { margin-top: 16px; }
     .full-width { width: 100%; margin-bottom: 12px; }
     .actions-panel { display: flex; flex-direction: column; gap: 16px; }
+    .assign-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .mt-8 { margin-top: 8px; }
     .center { display: flex; justify-content: center; padding: 64px; }
     .priority-low { color: #388e3c; }
     .priority-medium { color: #f57c00; }
@@ -160,14 +195,17 @@ import { ChatPanelComponent } from '../../chat/chat-panel/chat-panel.component';
 export class TicketDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private ticketService = inject(TicketService);
+  private adminService = inject(AdminService);
   private snackBar = inject(MatSnackBar);
   auth = inject(AuthService);
 
   ticket = signal<Ticket | null>(null);
   notes = signal<TicketNote[]>([]);
+  users = signal<User[]>([]);
   loading = signal(true);
   newStatus: string = '';
   newNoteBody = '';
+  selectedOperatorId = '';
 
   get ticketId(): string {
     return this.route.snapshot.paramMap.get('id')!;
@@ -184,6 +222,9 @@ export class TicketDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+    if (this.auth.isAdmin()) {
+      this.adminService.listUsers().subscribe({ next: u => this.users.set(u) });
+    }
   }
 
   changeStatus(): void {
@@ -195,6 +236,30 @@ export class TicketDetailComponent implements OnInit {
         this.snackBar.open('Status updated', '', { duration: 2000 });
         this.loadNotes();
       },
+      error: err => this.snackBar.open(err.error?.detail || 'Error', '', { duration: 3000 })
+    });
+  }
+
+  assignToMe(): void {
+    const me = this.auth.currentUser();
+    if (!me) return;
+    this.ticketService.assign(this.ticketId, me.id).subscribe({
+      next: t => { this.ticket.set(t); this.snackBar.open('Ticket assigned to you', '', { duration: 2000 }); this.loadNotes(); },
+      error: err => this.snackBar.open(err.error?.detail || 'Error', '', { duration: 3000 })
+    });
+  }
+
+  assignTo(): void {
+    if (!this.selectedOperatorId) return;
+    this.ticketService.assign(this.ticketId, this.selectedOperatorId).subscribe({
+      next: t => { this.ticket.set(t); this.selectedOperatorId = ''; this.snackBar.open('Ticket assigned', '', { duration: 2000 }); this.loadNotes(); },
+      error: err => this.snackBar.open(err.error?.detail || 'Error', '', { duration: 3000 })
+    });
+  }
+
+  unassign(): void {
+    this.ticketService.assign(this.ticketId, null).subscribe({
+      next: t => { this.ticket.set(t); this.snackBar.open('Ticket unassigned', '', { duration: 2000 }); this.loadNotes(); },
       error: err => this.snackBar.open(err.error?.detail || 'Error', '', { duration: 3000 })
     });
   }
@@ -217,7 +282,7 @@ export class TicketDetailComponent implements OnInit {
     });
   }
 
-  private loadNotes(): void {
+  loadNotes(): void {
     this.ticketService.listNotes(this.ticketId).subscribe({
       next: notes => this.notes.set(notes)
     });
