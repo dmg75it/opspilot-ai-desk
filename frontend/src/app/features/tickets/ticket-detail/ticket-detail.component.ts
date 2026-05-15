@@ -11,7 +11,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatTabsModule } from '@angular/material/tabs';
 import { TicketService } from '../../../core/services/ticket.service';
 import { NoteService } from '../../../core/services/note.service';
+import { UserService } from '../../../core/services/user.service';
+import { AuthService } from '../../../core/auth/auth.service';
 import { Ticket, Note } from '../../../core/models/ticket.model';
+import { User } from '../../../core/models/user.model';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ErrorBannerComponent } from '../../../shared/components/error-banner/error-banner.component';
 import { AiChatPanelComponent } from '../../ai-chat/ai-chat-panel.component';
@@ -54,6 +57,42 @@ import { AiChatPanelComponent } from '../../ai-chat/ai-chat-panel.component';
           <mat-divider style="margin:1rem 0"></mat-divider>
           <p><strong>Created by:</strong> {{ ticket()!.createdByEmail }} · <strong>Assigned:</strong> {{ ticket()!.assignedToEmail || 'Unassigned' }}</p>
           <p><strong>Created:</strong> {{ ticket()!.createdAt | date:'medium' }} · <strong>Updated:</strong> {{ ticket()!.updatedAt | date:'medium' }}</p>
+
+          <!-- Assignment controls -->
+          <mat-divider style="margin:1rem 0"></mat-divider>
+          <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+
+            <!-- Admin: dropdown + assign button -->
+            <ng-container *ngIf="auth.isAdmin()">
+              <mat-form-field style="width:220px;margin-bottom:-1.25em">
+                <mat-label>Assign to</mat-label>
+                <mat-select [formControl]="assigneeControl">
+                  <mat-option [value]="null">— Unassigned —</mat-option>
+                  <mat-option *ngFor="let u of users()" [value]="u.id">{{ u.email }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button mat-raised-button color="primary"
+                      (click)="applyAssign()"
+                      [disabled]="assigneeControl.value === currentAssigneeId()">
+                Assign
+              </button>
+            </ng-container>
+
+            <!-- Operator: self-assign or unassign self -->
+            <ng-container *ngIf="!auth.isAdmin()">
+              <button mat-stroked-button color="primary"
+                      *ngIf="ticket()!.assignedToEmail !== auth.currentUser()?.email"
+                      (click)="assignToMe()">
+                Assign to me
+              </button>
+              <button mat-stroked-button color="warn"
+                      *ngIf="ticket()!.assignedToEmail === auth.currentUser()?.email"
+                      (click)="unassign()">
+                Unassign
+              </button>
+            </ng-container>
+
+          </div>
         </mat-card-content>
       </mat-card>
 
@@ -87,13 +126,17 @@ export class TicketDetailComponent implements OnInit {
   notes = signal<Note[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
+  users = signal<User[]>([]);
   statusControl = new FormControl('');
   noteControl = new FormControl('');
+  assigneeControl = new FormControl<string | null>(null);
 
   constructor(
     private route: ActivatedRoute,
     private ticketService: TicketService,
-    private noteService: NoteService
+    private noteService: NoteService,
+    private userService: UserService,
+    public auth: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -104,8 +147,19 @@ export class TicketDetailComponent implements OnInit {
         this.statusControl.setValue(t.status);
         this.loading.set(false);
         this.loadNotes(id);
+        if (this.auth.isAdmin()) this.loadUsers(t);
       },
       error: () => { this.error.set('Ticket not found'); this.loading.set(false); }
+    });
+  }
+
+  loadUsers(t: Ticket): void {
+    this.userService.listUsers().subscribe({
+      next: users => {
+        this.users.set(users);
+        this.assigneeControl.setValue(this.currentAssigneeId());
+      },
+      error: () => {}
     });
   }
 
@@ -113,6 +167,38 @@ export class TicketDetailComponent implements OnInit {
     this.noteService.listNotes(id).subscribe({
       next: notes => this.notes.set(notes),
       error: () => {}
+    });
+  }
+
+  currentAssigneeId(): string | null {
+    const email = this.ticket()?.assignedToEmail ?? null;
+    if (!email) return null;
+    return this.users().find(u => u.email === email)?.id ?? null;
+  }
+
+  assignToMe(): void {
+    const id = this.auth.currentUser()?.id;
+    if (!id) return;
+    this.doAssign(id);
+  }
+
+  unassign(): void {
+    this.doAssign(null);
+  }
+
+  applyAssign(): void {
+    this.doAssign(this.assigneeControl.value);
+  }
+
+  private doAssign(userId: string | null): void {
+    const t = this.ticket();
+    if (!t) return;
+    this.ticketService.assign(t.id, userId).subscribe({
+      next: updated => {
+        this.ticket.set(updated);
+        this.assigneeControl.setValue(this.currentAssigneeId());
+      },
+      error: () => { this.error.set('Failed to update assignment'); }
     });
   }
 
