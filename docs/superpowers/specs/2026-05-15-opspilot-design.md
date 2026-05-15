@@ -33,7 +33,7 @@ opspilot-ai-desk/
 
 **Key architectural decisions:**
 - JWT authentication: issued at login, validated by `JwtFilter` on every request
-- AI provider isolated behind `AiClient` interface; `FakeAiClient` is the default (no external calls), `OpenRouterClient` activated via `ai.provider=openrouter` property
+- AI provider isolated behind `AiClient` interface; `FakeAiClient` is the default (no external calls), `OpenRouterClient` activated by setting env var `AI_PROVIDER=openrouter`
 - Flyway manages all schema migrations; `DataInitializer` updates BCrypt password hashes at startup
 - CORS fully configurable via `application.yml`
 - Maven uses `JAVA_HOME=/opt/platform/jdk-21.0.7` (Java 21 at non-standard path)
@@ -158,12 +158,12 @@ public interface AiClient {
 
 **Implementations:**
 - `FakeAiClient` — returns deterministic canned responses; default in all environments unless overridden
-- `OpenRouterClient` — calls `OPENROUTER_BASE_URL/chat/completions`; activated by `ai.provider=openrouter`
+- `OpenRouterClient` — calls `OPENROUTER_BASE_URL/chat/completions`; activated by env var `AI_PROVIDER=openrouter`
 
 **Configuration (externalized):**
 ```yaml
 ai:
-  provider: fake                        # or: openrouter
+  provider: ${AI_PROVIDER:fake}         # env var: AI_PROVIDER=fake | openrouter
   openrouter:
     api-key: ${OPENROUTER_API_KEY:}
     base-url: ${OPENROUTER_BASE_URL:https://openrouter.ai/api/v1}
@@ -171,6 +171,14 @@ ai:
     timeout-seconds: 30
     max-tokens: 1024
     temperature: 0.7
+```
+
+**`.env.example` includerà:**
+```
+AI_PROVIDER=fake
+OPENROUTER_API_KEY=
+OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
+OPENROUTER_MODEL=openai/gpt-4o-mini
 ```
 
 **Security:** API key never logged, never returned to frontend. Logs show model name and elapsed time only.
@@ -231,4 +239,4 @@ frontend-build, stack-up, stack-down, clean
 - Java 21 is at `/opt/platform/jdk-21.0.7/` (non-standard path); all Maven invocations must set `JAVA_HOME` explicitly
 - Integration tests require Docker (Testcontainers)
 - Frontend tests require `CHROME_BIN=/usr/bin/chromium` (or equivalent)
-- AI chat only works end-to-end when `OPENROUTER_API_KEY` is set and `ai.provider=openrouter`; all other environments use `FakeAiClient`
+- AI chat only works end-to-end when `OPENROUTER_API_KEY` is set and `AI_PROVIDER=openrouter`; all other environments use `FakeAiClient`
