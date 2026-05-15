@@ -147,19 +147,19 @@ export class TicketDetailComponent implements OnInit {
         this.statusControl.setValue(t.status);
         this.loading.set(false);
         this.loadNotes(id);
-        if (this.auth.isAdmin()) this.loadUsers(t);
+        if (this.auth.isAdmin()) this.loadUsers();
       },
       error: () => { this.error.set('Ticket not found'); this.loading.set(false); }
     });
   }
 
-  loadUsers(t: Ticket): void {
+  loadUsers(): void {
     this.userService.listUsers().subscribe({
       next: users => {
         this.users.set(users);
         this.assigneeControl.setValue(this.currentAssigneeId());
       },
-      error: () => {}
+      error: () => { this.error.set('Failed to load users'); }
     });
   }
 
