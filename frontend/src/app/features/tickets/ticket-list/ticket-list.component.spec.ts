@@ -40,13 +40,13 @@ describe('TicketListComponent', () => {
       ],
       totalElements: 1, totalPages: 1, number: 0, size: 20
     });
-    expect(component.tickets.length).toBe(1);
-    expect(component.tickets[0].title).toBe('Test');
+    expect(component.tickets().length).toBe(1);
+    expect(component.tickets()[0].title).toBe('Test');
   });
 
   it('should show error when loading fails', () => {
     component.ngOnInit();
     http.expectOne(r => r.url.includes('/api/tickets')).flush('error', { status: 500, statusText: 'Error' });
-    expect(component.error).toBeTruthy();
+    expect(component.error()).toBeTruthy();
   });
 });
